@@ -1,32 +1,45 @@
 module Config (Config(..), Player(..), defaultConfig, override) where
 
 import           Control.Monad            (void)
+import           Data.Bool                (bool)
 import           Data.Functor             ((<&>))
-import           GHC.IO.Exception         (ExitCode (..))
 import           System.Environment       (getEnv)
+import           System.Exit              (ExitCode (..))
 import           System.FilePath          ((</>))
-import           System.Process           (CreateProcess (..), proc,
-                                           readProcessWithExitCode, shell,
+import           System.Process           (CreateProcess (..), callProcess,
+                                           proc, readProcessWithExitCode, shell,
                                            waitForProcess, withCreateProcess)
 import           System.Process.Internals (ProcessHandle)
-
-data Player = Player { play    :: FilePath -> IO ()
-                     , shuffle :: FilePath -> IO ()
-                     }
-
-data Config = Config { musicDir :: IO FilePath
-                     , srcSh    :: IO FilePath
-                     , editor   :: IO FilePath
-                     , player   :: IO Player
-                     }
 
 defaultConfig :: Config
 defaultConfig = Config { musicDir = musicDir'
                        , srcSh = musicDir' <&> (</> "src.sh")
                        , editor = getEnv "EDITOR"
-                       , player = do exists <- existsShellCommand "mpv"
-                                     return $ if exists then mpv else afplay
+                       , player = existsShellCommand "mpv" <&> bool mpv afplay . not
+                       , downloader = existsShellCommand "mpv" <&> bool ytdlp (error "Fatal: no downloader given") . not
                        }
+
+data Config = Config { musicDir   :: IO FilePath
+                     , srcSh      :: IO FilePath
+                     , editor     :: IO FilePath
+                     , player     :: IO Player
+                     , downloader :: IO Downloader
+                     }
+
+data Player = Player { play    :: FilePath -> IO ()
+                     , shuffle :: FilePath -> IO ()
+                     }
+
+type URL = String
+
+-- downloader: able to download mp3 audio given target url as source and filepath of downloaded track
+newtype Downloader = Downloader { download :: URL -> FilePath -> IO () }
+
+-- eval "$downloader -x --audio-format mp3 '$link' -o $HOME/Music/$name.mp3"
+-- verbose?
+ytdlp :: Downloader
+ytdlp = Downloader { download = \url dest -> callProcess "ytdlp" ["-x", "--audio-format", "mp3", url, "-o", dest]
+                   }
 
 musicDir' :: IO FilePath
 musicDir' = getEnv "HOME" <&> (</> "Music")
