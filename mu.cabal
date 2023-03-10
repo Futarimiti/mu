@@ -75,7 +75,11 @@ executable mu
                       directory,
                       filepath,
                       process,
-                      random
+                      random,
+                      turtle,
+                      containers,
+                      dhall,
+                      text
 
     -- Directories containing source files.
     hs-source-dirs:   app

@@ -1,8 +1,9 @@
-module Config (Config(..), Player(..), defaultConfig, override) where
+module Config (Config(..), Player(..), defaultConfig, override, Editor(..), Downloader(..)) where
 
 import           Control.Monad            (void)
 import           Data.Bool                (bool)
 import           Data.Functor             ((<&>))
+import           Data.List                (singleton)
 import           System.Environment       (getEnv)
 import           System.Exit              (ExitCode (..))
 import           System.FilePath          ((</>))
@@ -13,18 +14,18 @@ import           System.Process.Internals (ProcessHandle)
 
 defaultConfig :: Config
 defaultConfig = Config { musicDir = musicDir'
-                       , srcSh = musicDir' <&> (</> "src.sh")
-                       , editor = getEnv "EDITOR"
+                       , editor = shellEditor
                        , player = existsShellCommand "mpv" <&> bool mpv afplay . not
                        , downloader = existsShellCommand "mpv" <&> bool ytdlp (error "Fatal: no downloader given") . not
                        }
 
 data Config = Config { musicDir   :: IO FilePath
-                     , srcSh      :: IO FilePath
-                     , editor     :: IO FilePath
+                     , editor     :: IO Editor
                      , player     :: IO Player
                      , downloader :: IO Downloader
                      }
+
+newtype Editor = Editor { edit :: FilePath -> IO () }
 
 data Player = Player { play    :: FilePath -> IO ()
                      , shuffle :: FilePath -> IO ()
@@ -35,10 +36,14 @@ type URL = String
 -- downloader: able to download mp3 audio given target url as source and filepath of downloaded track
 newtype Downloader = Downloader { download :: URL -> FilePath -> IO () }
 
+shellEditor :: IO Editor
+shellEditor = do e <- getEnv "EDITOR"
+                 return $ Editor { edit = callProcess e . singleton }
+
 -- eval "$downloader -x --audio-format mp3 '$link' -o $HOME/Music/$name.mp3"
 -- verbose?
 ytdlp :: Downloader
-ytdlp = Downloader { download = \url dest -> callProcess "ytdlp" ["-x", "--audio-format", "mp3", url, "-o", dest]
+ytdlp = Downloader { download = \url dest -> callProcess "yt-dlp" ["-x", "--audio-format", "mp3", url, "-o", dest]
                    }
 
 musicDir' :: IO FilePath
