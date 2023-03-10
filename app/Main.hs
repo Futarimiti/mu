@@ -2,29 +2,32 @@
 
 module Main (main) where
 
-import           Config             (Config (..), Downloader (..), Editor (..),
-                                     Player (..), defaultConfig, override)
-import           Control.Monad      (guard, unless)
-import           Data.Function      ((&))
-import           Data.Functor       ((<&>))
-import           Data.List          (isInfixOf, isSuffixOf)
-import           Data.List.NonEmpty (NonEmpty, nonEmpty)
-import qualified Data.List.NonEmpty as NE ((!!))
-import           Data.Map.Strict    (Map, difference, empty, findWithDefault,
-                                     fromList, keys, toList)
-import           Data.String        (IsString (fromString))
-import           Data.Text          (append)
-import           Dhall              (input, map, string)
-import           System.Directory   (XdgDirectory (XdgCache), copyFile,
-                                     doesDirectoryExist, doesFileExist,
-                                     getXdgDirectory, listDirectory)
-import           System.Environment (getArgs)
-import           System.Exit        (die)
-import           System.FilePath    (splitFileName, (</>))
-import           System.IO          (readFile')
-import           System.Process     (callProcess)
-import           System.Random      (randomRIO)
-import           Turtle             (touch)
+import           Config              (Config (..), Downloader (..), Editor (..),
+                                      Player (..), defaultConfig, override)
+import           Control.Monad       (forM_, guard, unless, when)
+import           Data.Function       ((&))
+import           Data.Functor        ((<&>))
+import           Data.List           (intercalate, isInfixOf, isSuffixOf)
+import           Data.List.NonEmpty  (NonEmpty, nonEmpty)
+import qualified Data.List.NonEmpty  as NE ((!!))
+import           Data.Map.Strict     (Map, difference, empty, findWithDefault,
+                                      fromList, keys, toList)
+import           Data.String         (IsString (fromString))
+import           Data.Text           (append)
+import           Dhall               (input, map, string)
+import           System.Console.ANSI (Color (Green), ColorIntensity (Dull),
+                                      ConsoleLayer (Foreground),
+                                      SGR (Reset, SetColor), setSGR)
+import           System.Directory    (XdgDirectory (XdgCache), copyFile,
+                                      doesDirectoryExist, doesFileExist,
+                                      getXdgDirectory, listDirectory)
+import           System.Environment  (getArgs)
+import           System.Exit         (die)
+import           System.FilePath     (splitFileName, (</>))
+import           System.IO           (readFile')
+import           System.Process      (callProcess)
+import           System.Random       (randomRIO)
+import           Turtle              (touch, rm)
 
 main :: IO ()
 main = getArgs >>= mu
@@ -79,31 +82,47 @@ type Record = Map String URL
 doActions :: Record  -- new
           -> Record  -- old
           -> IO ()
-doActions new old = do downloadTracks newTracks
-                       removeTracks removedTracks
-                       reinstallTracks urlChangedTracks
+doActions new old = do downloadTracks Verbose newTracks
+                       removeTracks Verbose removedTracks
+                       reinstallTracks Verbose urlChangedTracks
                          where newTracks = difference new old
                                removedTracks = difference old new
                                urlChangedTracks = toList new & filter (\(track, newUrl) -> getOldUrl track newUrl /= newUrl) & fromList
                                  where getOldUrl track newUrl = findWithDefault newUrl track old
 
+data Verbose = Verbose | Silent
+  deriving (Eq, Show)
 
-downloadTracks :: Record -> IO ()
-downloadTracks tracks = do putStrLn $ "new tracks: " ++ unwords (keys tracks)
+printTracks :: Map String a -> Maybe String -> [Char] -> IO ()
+printTracks tracks ok new = case keys tracks of
+                               [] -> forM_ ok putStrLn
+                               ks -> do setSGR [SetColor Foreground Dull Green]
+                                        putStr new
+                                        setSGR [Reset]
+                                        putStr ('[' : intercalate ", " ks)
+                                        putStrLn "]"
+
+downloadTracks :: Verbose -> Record -> IO ()
+downloadTracks v tracks = do when verbose printNewTracks
+                             mdir <- musicDir userConfig
+                             d <- downloader userConfig
+                             mapM_ (\(songname, url) -> download d url (mdir </> songname ++ ".mp3")) (toList tracks)
+                               where verbose = v == Verbose
+                                     printNewTracks = printTracks tracks (Just "all tracks up to date") "new tracks: "
+
+removeTracks :: Verbose -> Record -> IO ()
+removeTracks v tracks = do when verbose printRemovingTracks
                            mdir <- musicDir userConfig
-                           d <- downloader userConfig
-                           mapM_ (\(songname, url) -> download d url (mdir </> songname ++ ".mp3")) (toList tracks)
+                           mapM_ (\songname -> rm (mdir </> songname ++ ".mp3")) (keys tracks)
+                             where verbose = v == Verbose
+                                   printRemovingTracks = printTracks tracks (Just "no tracks to be removed") "tracks to be removed: "
 
-removeTracks :: Record -> IO ()
-removeTracks tracks = do putStrLn $ "deleted tracks: " ++ unwords (keys tracks)
-                         mdir <- musicDir userConfig
-                         mapM_ (\songname -> rmi (mdir </> songname ++ ".mp3")) (keys tracks)
-                           where rmi f = callProcess "rm" ["-i", "--", f]
-
-reinstallTracks :: Record -> IO ()
-reinstallTracks tracks = do putStrLn $ "reinstall tracks: " ++ unwords (keys tracks)
-                            removeTracks tracks
-                            downloadTracks tracks
+reinstallTracks :: Verbose -> Record -> IO ()
+reinstallTracks v tracks = do when verbose printReinstallingTracks
+                              removeTracks Silent tracks
+                              downloadTracks Silent tracks
+                                where verbose = v == Verbose
+                                      printReinstallingTracks = printTracks tracks Nothing "tracks to be reinstalled: "
 
 dhallEmptyRecord :: Record
 dhallEmptyRecord = empty
@@ -201,7 +220,9 @@ playMusic track = do mdir <- musicDir userConfig
 
 -- display track name then play it
 showNplay :: FilePath -> IO ()
-showNplay track = putStrLn ("-> " ++ green ++ track ++ nc) >> playMusic track
-  where green = "\ESC[32m"
-        nc = "\ESC[0"
+showNplay track = do setSGR [SetColor Foreground Dull Green]
+                     putStr "-> "
+                     setSGR [Reset]
+                     putStrLn track
+                     playMusic track
 
