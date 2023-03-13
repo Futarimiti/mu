@@ -7,7 +7,7 @@ import           Config              (Config (..), Downloader (..), Editor (..),
 import           Control.Monad       (forM_, guard, unless, when)
 import           Data.Function       ((&))
 import           Data.Functor        ((<&>))
-import           Data.List           (intercalate, isInfixOf, isSuffixOf)
+import           Data.List           (intercalate, isInfixOf)
 import           Data.List.NonEmpty  (NonEmpty, nonEmpty)
 import qualified Data.List.NonEmpty  as NE ((!!))
 import           Data.Map.Strict     (Map, difference, empty, findWithDefault,
@@ -23,7 +23,8 @@ import           System.Directory    (XdgDirectory (XdgCache), copyFile,
                                       getXdgDirectory, listDirectory)
 import           System.Environment  (getArgs)
 import           System.Exit         (die)
-import           System.FilePath     (splitFileName, (</>))
+import           System.FilePath     (isExtensionOf, splitFileName, (<.>),
+                                      (</>))
 import           System.Process      (callProcess)
 import           System.Random       (randomRIO)
 import           Turtle              (rm, touch)
@@ -114,14 +115,14 @@ downloadTracks :: Verbose -> Record -> IO ()
 downloadTracks v tracks = do when verbose printNewTracks
                              mdir <- musicDir userConfig
                              d <- downloader userConfig
-                             mapM_ (\(songname, url) -> download d url (mdir </> songname ++ ".mp3")) (toList tracks)
+                             mapM_ (\(songname, url) -> download d url (mdir </> songname <.> "mp3")) (toList tracks)
                                where verbose = v == Verbose
                                      printNewTracks = printTracks tracks (Just "all tracks up to date") "new tracks: "
 
 removeTracks :: Verbose -> Record -> IO ()
 removeTracks v tracks = do when verbose printRemovingTracks
                            mdir <- musicDir userConfig
-                           mapM_ (\songname -> rm (mdir </> songname ++ ".mp3")) (keys tracks)
+                           mapM_ (\songname -> rm (mdir </> songname <.> ".mp3")) (keys tracks)
                              where verbose = v == Verbose
                                    printRemovingTracks = printTracks tracks (Just "no tracks to be removed") "tracks to be removed: "
 
@@ -193,7 +194,7 @@ fuzzy dir f = listAllMp3 dir <&> filter (f `isInfixOf`)
 
 listAllMp3 :: FilePath -> IO [FilePath]
 listAllMp3 dir = do dirExists <- doesDirectoryExist dir
-                    if dirExists then listDirectory dir <&> filter (".mp3" `isSuffixOf`)
+                    if dirExists then listDirectory dir <&> filter ("mp3" `isExtensionOf`)
                                  else return []
 
 -- randomly select one from an non-empty list
