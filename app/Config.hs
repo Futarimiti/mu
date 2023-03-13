@@ -15,7 +15,8 @@ import           System.Process.Internals (ProcessHandle)
 defaultConfig :: Config
 defaultConfig = Config { musicDir = musicDir'
                        , editor = shellEditor
-                       , player = existsShellCommand "mpv" <&> bool mpv afplay . not
+                       -- , player = existsShellCommand "mpv" <&> bool mpv afplay . not
+                       , player = return afplay
                        , downloader = existsShellCommand "mpv" <&> bool ytdlp (error "Fatal: no downloader given") . not
                        }
 
@@ -52,15 +53,21 @@ musicDir' = getEnv "HOME" <&> (</> "Music")
 existsShellCommand :: String -> IO Bool
 existsShellCommand cmd = readProcessWithExitCode "command" ["-v", "--", cmd] "" <&> \(b, _, _) -> b == ExitSuccess
 
-mpv :: Player
-mpv = Player { play = \track -> withCreateProcess (proc "mpv" ["--no-video", "--", track]) vwait
-             , shuffle = \mdir -> withCreateProcess (shell "mpv --no-video --shuffle -- mpv -- $(find . -maxdepth 1 -iname \"*.mp3\" | cut -d/ -f2-)") { cwd = Just mdir } vwait
-             }
+-- mpv :: Player
+-- mpv = Player { play = \track -> withCreateProcess (proc "mpv" ["--no-video", "--", track]) vwait
+--              , shuffle = \mdir -> withCreateProcess (shell "mpv --no-video --shuffle -- mpv -- $(find . -maxdepth 1 -iname \"*.mp3\" | cut -d/ -f2-)") { cwd = Just mdir } vwait
+--              }
 
+-- note: afplay does not support --
 afplay :: Player
-afplay = Player { play = \track -> withCreateProcess (proc "afplay" ["--", track]) vwait
-                , shuffle = \mdir -> withCreateProcess (shell "afplay -- $(find . -maxdepth 1 -iname \"*.mp3\")") { cwd = Just mdir } vwait
-                }
+afplay = afplayWithQuality True
+
+-- high quality? True -> 1; False -> 0
+afplayWithQuality :: Bool -> Player
+afplayWithQuality b  = Player { play = \track -> withCreateProcess (proc "afplay" ["-q", q, track]) vwait
+                              , shuffle = \mdir -> withCreateProcess (shell $ "afplay -q " ++ q ++ " $(find . -maxdepth 1 -iname \"*.mp3\")") { cwd = Just mdir } vwait
+                              }
+                                where q = if b then "1" else "0"
 
 vwait :: p1 -> p2 -> p3 -> ProcessHandle -> IO ()
 vwait _ _ _ p = void $ waitForProcess p
