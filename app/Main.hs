@@ -12,9 +12,9 @@ import           Data.List.NonEmpty  (NonEmpty, nonEmpty)
 import qualified Data.List.NonEmpty  as NE ((!!))
 import           Data.Map.Strict     (Map, difference, empty, findWithDefault,
                                       fromList, keys, toList)
-import           Data.String         (IsString (fromString))
-import           Data.Text           (append)
-import           Dhall               (input, map, string)
+import           Data.Yaml           (Value)
+import qualified Data.Yaml           as Yaml
+import           Data.Yaml.Aeson     (Value (..))
 import           System.Console.ANSI (Color (Green), ColorIntensity (Dull),
                                       ConsoleLayer (Foreground),
                                       SGR (Reset, SetColor), setSGR)
@@ -24,10 +24,9 @@ import           System.Directory    (XdgDirectory (XdgCache), copyFile,
 import           System.Environment  (getArgs)
 import           System.Exit         (die)
 import           System.FilePath     (splitFileName, (</>))
-import           System.IO           (readFile')
 import           System.Process      (callProcess)
 import           System.Random       (randomRIO)
-import           Turtle              (touch, rm)
+import           Turtle              (rm, touch)
 
 main :: IO ()
 main = getArgs >>= mu
@@ -63,16 +62,25 @@ upgrade = do e <- editor userConfig
              unless updateFileExists createUpdateEditInfoFile
              edit e updateFile
 
-             pastFile <- pastUpdateFile
+             pastFile <- pastUpdateFilePath
              pastUpdateFileExists <- doesFileExist pastFile
 
-             updatedRecord <- dhallInterpretRecord updateFile
-             previousRecord <- if pastUpdateFileExists then dhallInterpretRecord pastFile else return dhallEmptyRecord
+             updatedRecord <- interpretDict updateFile
+             previousRecord <- if pastUpdateFileExists then interpretDict pastFile else return emptyDict
              doActions updatedRecord previousRecord
              makePastUpdateFile  -- last step
 
 type URL = String
 type Record = Map String URL
+
+interpretDict :: FilePath -> IO Record
+interpretDict = yamlInterpretDict
+
+yamlInterpretDict :: FilePath -> IO Record
+yamlInterpretDict f = do primitive <- Yaml.decodeFileThrow f :: IO Value
+                         case primitive of
+                           Null -> return empty
+                           _    -> Yaml.decodeFileThrow f
 
 -- find the difference between new and old records:
 -- new tracks
@@ -124,18 +132,14 @@ reinstallTracks v tracks = do when verbose printReinstallingTracks
                                 where verbose = v == Verbose
                                       printReinstallingTracks = printTracks tracks Nothing "tracks to be reinstalled: "
 
-dhallEmptyRecord :: Record
-dhallEmptyRecord = empty
+emptyDict :: Record
+emptyDict = empty
 
-dhallInterpretRecord :: FilePath -> IO Record
-dhallInterpretRecord f = do content <- readFile' f
-                            input (Dhall.map string string) (append "toMap " (fromString content))
-
-pastUpdateFile :: IO FilePath
-pastUpdateFile = getXdgDirectory XdgCache "mu/LAST_UPDATE"
+pastUpdateFilePath :: IO FilePath
+pastUpdateFilePath = getXdgDirectory XdgCache "mu/LAST_UPDATE"
 
 makePastUpdateFile :: IO ()
-makePastUpdateFile = do p <- pastUpdateFile
+makePastUpdateFile = do p <- pastUpdateFilePath
                         u <- updateEditInfoFile
                         createFile p
                         copyFile u p
@@ -149,13 +153,13 @@ createUpdateEditInfoFile = do u <- updateEditInfoFile
                               writeFile u updateEditInfoInitialContent
 
 updateEditInfoInitialContent :: String
-updateEditInfoInitialContent = [ "-- update your music library in this file."
+updateEditInfoInitialContent = [ "# vim: ft=yaml"
+                               , "# update your music library in this file."
                                , ""
-                               , "-- to add a new track, put a new pair of strings: track name = url"
-                               , "-- to remove a local track, delete or comment out corresponding entry"
-                               , "-- to rename a local track or to update its source url, edit correspondent string"
+                               , "# to add a new track, put a new pair of strings like `track name: url`"
+                               , "# to remove a local track, delete or comment out corresponding entry"
+                               , "# to rename a local track or to update source url, edit correspondent string"
                                , ""
-                               , "{=}"
                                ] & unlines
 
 -- no effect if given filepath already exist

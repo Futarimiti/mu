@@ -78,9 +78,9 @@ executable mu
                       random,
                       turtle,
                       containers,
-                      dhall,
                       text,
-                      ansi-terminal
+                      ansi-terminal,
+                      yaml
 
     -- Directories containing source files.
     hs-source-dirs:   app
