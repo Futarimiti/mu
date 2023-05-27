@@ -36,23 +36,35 @@ main = getArgs >>= mu
 userConfig :: Config
 userConfig = override undefined defaultConfig
 
-mu :: [String]  -- commandline args
-   -> IO ()
-mu [] = shuffleAll
-mu [x] = case x of
-      "--update"  -> update
-      "-u"        -> update
-      "--upgrade" -> upgrade
-      "-U"        -> upgrade
-      ""          -> shuffleAll
-      "-a"        -> shuffleAll
-      "--all"     -> shuffleAll
-      "-q"        -> quitPlayer
-      "--"        -> shuffleAll
-      ('-': a)    -> die $ "unknown argument: -" ++ a ++ "\nshould you wish to perform a fuzzy search, run `mu -- -" ++ a ++ "`"
-      track       -> playit track
-mu ["--", name] = playit name
-mu o            = die $ "unexpected arguments or combination: " ++ unwords o
+mu :: [String] -> IO ()
+mu []             = shuffleAll
+mu (o@('-':_):as) = muReadOptionArgs o as
+mu tracks         = playseq tracks
+
+type Option = String  -- always starting with -
+type Args = [String]
+muReadOptionArgs :: Option -> Args -> IO ()
+muReadOptionArgs "--update"  _ = update
+muReadOptionArgs "-u"        _ = update
+muReadOptionArgs "--upgrade" _ = upgrade
+muReadOptionArgs "-U"        _ = upgrade
+muReadOptionArgs "-a"        _ = shuffleAll
+muReadOptionArgs "--all"     _ = shuffleAll
+muReadOptionArgs "-q"        _ = quitPlayer
+muReadOptionArgs "--"       [] = shuffleAll
+muReadOptionArgs "--"       xs = playseq xs
+muReadOptionArgs o           _ = die . concat $ [ "unrecognised option: ", o
+                                                , "\n"
+                                                , "should you wish to perform a fuzzy search for tracks with hyphen,"
+                                                , "run `mu -- ", o, "`"
+                                                ]
+
+type TrackName = String
+playseq :: [TrackName] -> IO ()
+playseq = mapM_ playit
+
+playit :: TrackName -> IO ()
+playit name = musicDir userConfig >>= flip randomFuzzy name >>= maybe (die $ "pattern matches no track: " ++ name) showNplay
 
 quitPlayer :: IO ()
 quitPlayer = do p <- player userConfig
@@ -180,9 +192,6 @@ createFile f = do let parentDir = fst . splitFileName $ f
 -- now the same as upgrade
 update :: IO ()
 update = upgrade
-
-playit :: String -> IO ()
-playit name = musicDir userConfig >>= flip randomFuzzy name >>= maybe (die $ "pattern matches no track: " ++ name) showNplay
 
   {- given destination directory and seed,
       perform a fuzzy search in the target directory
