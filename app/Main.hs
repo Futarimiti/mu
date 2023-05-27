@@ -38,6 +38,7 @@ userConfig = override undefined defaultConfig
 
 mu :: [String] -> IO ()
 mu []             = shuffleAll
+-- if first arg begins with -, read as option
 mu (o@('-':_):as) = muReadOptionArgs o as
 mu tracks         = playseq tracks
 
@@ -64,7 +65,9 @@ playseq :: [TrackName] -> IO ()
 playseq = mapM_ playit
 
 playit :: TrackName -> IO ()
-playit name = musicDir userConfig >>= flip randomFuzzy name >>= maybe (die $ "pattern matches no track: " ++ name) showNplay
+playit name = musicDir userConfig
+          >>= flip randomFuzzy name
+          >>= maybe (die $ "pattern matches no track: " ++ name) showNplay
 
 quitPlayer :: IO ()
 quitPlayer = do p <- player userConfig
