@@ -30,6 +30,7 @@ newtype Editor = Editor { edit :: FilePath -> IO () }
 
 data Player = Player { play    :: FilePath -> IO ()
                      , shuffle :: FilePath -> IO ()
+                     , quit    :: IO ()
                      }
 
 type URL = String
@@ -65,7 +66,8 @@ afplay = afplayWithQuality True
 -- high quality? True -> 1; False -> 0
 afplayWithQuality :: Bool -> Player
 afplayWithQuality b  = Player { play = \track -> withCreateProcess (proc "afplay" ["-q", q, track]) vwait
-                              , shuffle = \mdir -> withCreateProcess (shell $ "afplay -q " ++ q ++ " $(find . -maxdepth 1 -iname \"*.mp3\")") { cwd = Just mdir } vwait
+                              , shuffle = \mdir -> withCreateProcess (shell $ "for f in $(find . -maxdepth 1 -iname '*.mp3' -type f | shuf); do afplay -q " ++ q ++ " $f; done") { cwd = Just mdir } vwait
+                              , quit = withCreateProcess (shell "while [[ $(pgrep afplay) ]]; do killall afplay > /dev/null 2>&1; done") vwait
                               }
                                 where q = if b then "1" else "0"
 

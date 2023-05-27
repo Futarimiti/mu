@@ -47,11 +47,16 @@ mu [x] = case x of
       ""          -> shuffleAll
       "-a"        -> shuffleAll
       "--all"     -> shuffleAll
+      "-q"        -> quitPlayer
       "--"        -> shuffleAll
       ('-': a)    -> die $ "unknown argument: -" ++ a ++ "\nshould you wish to perform a fuzzy search, run `mu -- -" ++ a ++ "`"
       track       -> playit track
 mu ["--", name] = playit name
 mu o            = die $ "unexpected arguments or combination: " ++ unwords o
+
+quitPlayer :: IO ()
+quitPlayer = do p <- player userConfig
+                quit p
 
 -- call out editor on UPDATE_EDITINFO
 -- user finish updating: check new tracks, removed tracks, tracks with updated url, etc
