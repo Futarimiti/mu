@@ -71,12 +71,11 @@ executable mu
     -- other-extensions:
 
     -- Other library packages from which modules are imported.
-    build-depends:    base ^>=4.16.4.0,
+    build-depends:    base,
                       directory,
                       filepath,
                       process,
                       random,
-                      turtle,
                       containers,
                       text,
                       ansi-terminal,

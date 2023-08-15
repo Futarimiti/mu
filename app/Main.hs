@@ -20,14 +20,14 @@ import           System.Console.ANSI (Color (Green), ColorIntensity (Dull),
                                       SGR (Reset, SetColor), setSGR)
 import           System.Directory    (XdgDirectory (XdgCache), copyFile,
                                       doesDirectoryExist, doesFileExist,
-                                      getXdgDirectory, listDirectory)
+                                      getXdgDirectory, listDirectory,
+                                      removeFile)
 import           System.Environment  (getArgs)
 import           System.Exit         (die)
 import           System.FilePath     (isExtensionOf, splitFileName, (<.>),
                                       (</>))
 import           System.Process      (callProcess)
 import           System.Random       (randomRIO)
-import           Turtle              (rm, touch)
 
 main :: IO ()
 main = getArgs >>= mu
@@ -142,7 +142,7 @@ downloadTracks v tracks = do when verbose printNewTracks
 removeTracks :: Verbose -> Record -> IO ()
 removeTracks v tracks = do when verbose printRemovingTracks
                            mdir <- musicDir userConfig
-                           mapM_ (\songname -> rm (mdir </> songname <.> ".mp3")) (keys tracks)
+                           mapM_ (\songname -> removeFile (mdir </> songname <.> ".mp3")) (keys tracks)
                              where verbose = v == Verbose
                                    printRemovingTracks = printTracks tracks (Just "no tracks to be removed") "tracks to be removed: "
 
@@ -189,7 +189,7 @@ createFile f = do let parentDir = fst . splitFileName $ f
                   mkdirp parentDir
                   directoryExists <- doesDirectoryExist parentDir
                   guard directoryExists
-                  touch f
+                  createFile f
                     where mkdirp dir = callProcess "mkdir" ["-p", dir]
 
 -- now the same as upgrade

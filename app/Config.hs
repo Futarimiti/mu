@@ -1,16 +1,15 @@
 module Config (Config(..), Player(..), defaultConfig, override, Editor(..), Downloader(..)) where
 
-import           Control.Monad            (void)
-import           Data.Bool                (bool)
-import           Data.Functor             ((<&>))
-import           Data.List                (singleton)
-import           System.Environment       (getEnv)
-import           System.Exit              (ExitCode (..))
-import           System.FilePath          ((</>))
-import           System.Process           (CreateProcess (..), callProcess,
-                                           proc, readProcessWithExitCode, shell,
-                                           waitForProcess, withCreateProcess)
-import           System.Process.Internals (ProcessHandle)
+import           Control.Monad      (void)
+import           Data.Bool          (bool)
+import           Data.Functor       ((<&>))
+import           Data.List          (singleton)
+import           System.Environment (getEnv)
+import           System.Exit        (ExitCode (..))
+import           System.FilePath    ((</>))
+import           System.Process     (CreateProcess (..), ProcessHandle,
+                                     callProcess, proc, readProcessWithExitCode,
+                                     shell, waitForProcess, withCreateProcess)
 
 defaultConfig :: Config
 defaultConfig = Config { musicDir = musicDir'
