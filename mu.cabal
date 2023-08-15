@@ -19,7 +19,8 @@ common warnings
 executable mu
     import:           warnings
     main-is:          Main.hs
-    other-modules:    Lib, Command, Options
+    other-modules:    Lib, Commands, Options
     build-depends:    base ^>=4.17.1.0
+                    , optparse-applicative
     hs-source-dirs:   app, src
     default-language: GHC2021

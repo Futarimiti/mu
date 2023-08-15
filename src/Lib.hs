@@ -1,3 +1,3 @@
-module Lib () where
+module Lib where
 
-
+type SongName = String
