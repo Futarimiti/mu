@@ -1,4 +1,4 @@
-module Editor (Editor(..), shellEditor) where
+module Editor (Editor(..), shellEditor, vim) where
 
 import           Control.Applicative       (Alternative (..))
 import           Control.Monad.Trans.Maybe (MaybeT (..))
@@ -18,3 +18,6 @@ shellEditorCommand :: MaybeT IO FilePath
 shellEditorCommand = MaybeT $ do visual <- lookupEnv "VISUAL"
                                  editor <- lookupEnv "EDITOR"
                                  return $ visual <|> editor
+
+vim :: Editor
+vim = Editor { edit = callProcess "vim" . pure }
