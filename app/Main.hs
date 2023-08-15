@@ -26,6 +26,7 @@ import           System.Environment  (getArgs)
 import           System.Exit         (die)
 import           System.FilePath     (isExtensionOf, splitFileName, (<.>),
                                       (</>))
+import           System.Posix        (touchFile)
 import           System.Process      (callProcess)
 import           System.Random       (randomRIO)
 
@@ -189,7 +190,7 @@ createFile f = do let parentDir = fst . splitFileName $ f
                   mkdirp parentDir
                   directoryExists <- doesDirectoryExist parentDir
                   guard directoryExists
-                  createFile f
+                  touchFile f
                     where mkdirp dir = callProcess "mkdir" ["-p", dir]
 
 -- now the same as upgrade
