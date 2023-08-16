@@ -11,7 +11,7 @@ category:           Sound
 build-type:         Simple
 extra-doc-files:    README.md
 data-dir:           resources
-data-files:         info.dhall
+data-files:         messages.dhall
 
 common warnings
     ghc-options: -Wall -Wmonomorphism-restriction
@@ -19,8 +19,24 @@ common warnings
 executable mu
     import:           warnings
     main-is:          Main.hs
-    other-modules:    Lib, Commands, Options
+    other-modules:    Lib
+                    , Commands
+                    , Options
+                    , Config
+                    , Config.Defaults
+                    , Config.User
+                    , Editor
+                    , Player
+                    , Downloader
+                    , Messages
+                    , Paths_mu
     build-depends:    base ^>=4.17.1.0
                     , optparse-applicative
+                    , transformers ^>=0.6.0.0
+                    , dhall
+                    , process
+                    , text
+                    , directory
+                    , filepath
     hs-source-dirs:   app, src
     default-language: GHC2021
