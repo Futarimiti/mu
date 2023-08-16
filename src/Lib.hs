@@ -5,6 +5,7 @@ import           Control.Monad.Trans.Class  (MonadTrans (..))
 import           Control.Monad.Trans.Maybe  (MaybeT (..))
 import           Control.Monad.Trans.Writer (WriterT (runWriterT))
 import           Data.Bifunctor             (Bifunctor (second))
+import           Data.Text                  (Text)
 import           System.Directory           (doesDirectoryExist)
 import           System.Environment         (lookupEnv)
 import           System.FilePath            ((</>))
@@ -13,7 +14,7 @@ import           System.IO                  (hPutStrLn, stderr)
 type SongName = String
 type URL = FilePath
 type OS = String
-type ErrorMessage = String
+type ErrorMessage = Text
 
 xdgMusicDirs :: [MaybeT IO FilePath]
 xdgMusicDirs = [ do xdgMusic <- MaybeT $ lookupEnv "XDG_MUSIC_DIR"

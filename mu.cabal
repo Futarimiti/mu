@@ -26,6 +26,7 @@ executable mu
                     , Config
                     , Config.Defaults
                     , Config.User
+                    , Config.Parse
                     , Editor
                     , Player
                     , Downloader
@@ -43,5 +44,8 @@ executable mu
                     , directory
                     , filepath
                     , temporary
+                    , yaml
+                    , bytestring
+                    , containers
     hs-source-dirs:   app, src
     default-language: GHC2021
