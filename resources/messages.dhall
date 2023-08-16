@@ -2,5 +2,8 @@
 , cannotInferMusicDir = "Cannot infer a default directory to store audios"
 , mustManuallySetDownloader = "Cannot infer a default downloader, you must set it manually"
 , notSupportedUpdateFileFormat = \(format : Text) -> "INTERNAL ERROR: update file format \"${format}\" is not supported"
+, beginDownload = \(songname : Text) -> \(url : Text) -> "Downloading song \"${songname}\" from ${url}..."
+, beginDelete = \(songname : Text) -> "Deleting song \"${songname}\"..."
+, beginReinstall = \(songname : Text) -> \(url : Text) -> "Reinstalling song \"${songname}\" from ${url}..."
 }
 

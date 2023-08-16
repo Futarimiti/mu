@@ -2,15 +2,16 @@
 
 module FileInfo (FileInfo(..), fileinfo) where
 
-import           Data.Text    (Text, pack)
+import           Data.Text    (pack)
 import           Dhall        (FromDhall, auto, input)
 import           GHC.Generics (Generic)
 import           Paths_mu     (getDataFileName)
 
-data FileInfo = FileInfo { updateFilename    :: Text
-                         , updateFileExt     :: Text
-                         , updateFileFormat  :: Text
+data FileInfo = FileInfo { updateFilename    :: FilePath
+                         , updateFileExt     :: String
+                         , updateFileFormat  :: String
                          , serialiseDataPath :: FilePath  -- NOTE: NEED TO PREPEND XDG_DATA_HOME
+                         , audioFileExt      :: String
                          } deriving (Generic, FromDhall)
 
 fileinfo :: IO FileInfo

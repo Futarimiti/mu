@@ -12,6 +12,9 @@ data Messages = Messages { cannotInferDefaultPlayerByOS :: OS -> Text
                          , cannotInferMusicDir          :: Text
                          , mustManuallySetDownloader    :: Text
                          , notSupportedUpdateFileFormat :: String -> Text
+                         , beginDownload                :: SongName -> URL -> String
+                         , beginDelete                  :: SongName -> String
+                         , beginReinstall               :: SongName -> URL -> String
                          } deriving (Generic, FromDhall)
 
 messages :: IO Messages
