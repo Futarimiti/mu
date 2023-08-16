@@ -1,3 +1,5 @@
+{-# LANGUAGE RecordWildCards #-}
+
 module Lib where
 
 import           Codec.Serialise            (Serialise, readFileDeserialise,
@@ -7,13 +9,16 @@ import           Control.Monad.Trans.Class  (MonadTrans (..))
 import           Control.Monad.Trans.Maybe  (MaybeT (..))
 import           Control.Monad.Trans.Writer (WriterT (runWriterT))
 import           Data.Bifunctor             (Bifunctor (second))
+import           Data.List                  (intercalate)
 import           Data.Map                   (Map, filterWithKey, intersection,
                                              keys, (!), (\\))
+import           Data.Maybe                 (catMaybes)
 import           Data.Text                  (Text)
 import           System.Directory           (doesDirectoryExist)
 import           System.Environment         (lookupEnv)
 import           System.FilePath            ((</>))
 import           System.IO                  (hPutStrLn, stderr)
+import           Text.Printf                (printf)
 
 type SongName = String
 type URL = FilePath
@@ -81,3 +86,11 @@ compareTo old new = Changes added changed deleted
         changed = filterWithKey (\k v -> old ! k /= v) $ intersection new old
         deleted = keys $ old \\ new
 
+prettyPrintChanges :: Changes SongName URL -> String
+prettyPrintChanges Changes {..} = intercalate "\n" . catMaybes $ [newSongs, modifiedSongs, deletedSongs]
+  where newSongs, modifiedSongs, deletedSongs :: Maybe String
+        newSongs = template "new songs" (keys new)
+        modifiedSongs = template "to be reinstalled" (keys modified)
+        deletedSongs = template "to be deleted" deleted
+        template _ [] = Nothing
+        template prompt items = Just $ printf "%s: [%s]" prompt (intercalate ", " items)
