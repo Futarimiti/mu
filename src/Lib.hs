@@ -1,10 +1,14 @@
 module Lib where
 
+import           Codec.Serialise            (Serialise, readFileDeserialise,
+                                             writeFileSerialise)
 import           Control.Monad              (guard)
 import           Control.Monad.Trans.Class  (MonadTrans (..))
 import           Control.Monad.Trans.Maybe  (MaybeT (..))
 import           Control.Monad.Trans.Writer (WriterT (runWriterT))
 import           Data.Bifunctor             (Bifunctor (second))
+import           Data.Map                   (Map, filterWithKey, intersection,
+                                             keys, (!), (\\))
 import           Data.Text                  (Text)
 import           System.Directory           (doesDirectoryExist)
 import           System.Environment         (lookupEnv)
@@ -15,6 +19,12 @@ type SongName = String
 type URL = FilePath
 type OS = String
 type ErrorMessage = Text
+
+deserialiseMap :: (Ord a, Serialise a, Serialise b) => FilePath -> IO (Map a b)
+deserialiseMap = readFileDeserialise
+
+serialiseMap :: (Ord a, Serialise a, Serialise b) => Map a b -> FilePath -> IO ()
+serialiseMap = flip writeFileSerialise
 
 xdgMusicDirs :: [MaybeT IO FilePath]
 xdgMusicDirs = [ do xdgMusic <- MaybeT $ lookupEnv "XDG_MUSIC_DIR"
