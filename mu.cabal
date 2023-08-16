@@ -35,6 +35,7 @@ executable mu
                     , Play
                     , Paths_mu
                     , FileInfo
+                    , Serialise
     build-depends:    base ^>=4.17.1.0
                     , optparse-applicative
                     , transformers ^>=0.6.0.0
@@ -47,5 +48,6 @@ executable mu
                     , yaml
                     , bytestring
                     , containers
+                    , serialise
     hs-source-dirs:   app, src
     default-language: GHC2021
