@@ -4,7 +4,9 @@ module Commands (runCommand, MuCommand(..)) where
 
 import           Config  (Config)
 import           Lib
+import           Play    (playSeq, shuffle)
 import           Prelude hiding (log)
+import           Update  (update)
 
 -- | Functionalities parsed from commandline args
 data MuCommand = Play [SongName]  -- | Play songs sequentially
@@ -13,16 +15,7 @@ data MuCommand = Play [SongName]  -- | Play songs sequentially
                deriving (Show, Eq, Read)
 
 runCommand :: Config -> MuCommand -> IO ()
-runCommand c = \case (Play songs) -> seqPlay songs
+runCommand c = \case (Play songs) -> playSeq c songs
                      Shuffle -> shuffle c
                      Update -> update c
-
-update :: Config -> IO ()
-update = const $ log "update: TODO"
-
-shuffle :: Config -> IO ()
-shuffle = const $ log "shuffle: TODO"
-
-seqPlay :: [SongName] -> IO ()
-seqPlay = const $ log "seqPlay: TODO"
 
