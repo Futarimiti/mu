@@ -66,3 +66,18 @@ log = hPutStrLn stderr
 
 runLogT :: Functor m => LogT m a -> m (a, [String])
 runLogT m = second fromDiffList <$> runWriterT m
+
+data Changes a b = Changes { new      :: Map a b
+                           , modified :: Map a b
+                           , deleted  :: [a]
+                           } deriving (Show, Eq)
+
+compareTo :: (Ord a, Eq b)
+          => Map a b  -- old
+          -> Map a b  -- new
+          -> Changes a b
+compareTo old new = Changes added changed deleted
+  where added = new \\ old
+        changed = filterWithKey (\k v -> old ! k /= v) $ intersection new old
+        deleted = keys $ old \\ new
+
