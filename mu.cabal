@@ -12,6 +12,7 @@ build-type:         Simple
 extra-doc-files:    README.md
 data-dir:           resources
 data-files:         messages.dhall
+                  , fileinfo.dhall
 
 common warnings
     ghc-options: -Wall -Wmonomorphism-restriction
@@ -32,6 +33,7 @@ executable mu
                     , Update
                     , Play
                     , Paths_mu
+                    , FileInfo
     build-depends:    base ^>=4.17.1.0
                     , optparse-applicative
                     , transformers ^>=0.6.0.0
