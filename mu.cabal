@@ -29,6 +29,8 @@ executable mu
                     , Player
                     , Downloader
                     , Messages
+                    , Update
+                    , Play
                     , Paths_mu
     build-depends:    base ^>=4.17.1.0
                     , optparse-applicative
@@ -38,5 +40,6 @@ executable mu
                     , text
                     , directory
                     , filepath
+                    , temporary
     hs-source-dirs:   app, src
     default-language: GHC2021
