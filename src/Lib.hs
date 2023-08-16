@@ -13,6 +13,7 @@ import           System.IO                  (hPutStrLn, stderr)
 type SongName = String
 type URL = FilePath
 type OS = String
+type ErrorMessage = String
 
 xdgMusicDirs :: [MaybeT IO FilePath]
 xdgMusicDirs = [ do xdgMusic <- MaybeT $ lookupEnv "XDG_MUSIC_DIR"
