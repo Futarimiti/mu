@@ -14,10 +14,12 @@ import           Data.Map                   (Map, filterWithKey, intersection,
                                              keys, (!), (\\))
 import           Data.Maybe                 (catMaybes)
 import           Data.Text                  (Text)
+import           FileInfo                   (FileInfo (..), fileinfo)
 import           System.Directory           (createDirectoryIfMissing,
-                                             doesDirectoryExist)
+                                             doesDirectoryExist, listDirectory)
 import           System.Environment         (lookupEnv)
-import           System.FilePath            (takeDirectory, (</>))
+import           System.FilePath            (isExtensionOf, takeBaseName,
+                                             takeDirectory, (</>))
 import           System.IO                  (hPutStrLn, stderr)
 import           Text.Printf                (printf)
 
@@ -98,3 +100,11 @@ prettyPrintChanges Changes {..} = intercalate "\n" . catMaybes $ [newSongs, modi
         deletedSongs = template "to be deleted" deleted
         template _ [] = Nothing
         template prompt items = Just $ printf "%s: [%s]" prompt (intercalate ", " items)
+
+songsIn :: FilePath  -- dir
+        -> IO [String]  -- basenames
+songsIn dir = do files <- listDirectory dir
+                 fi <- fileinfo
+                 let audios = filter (audioFileExt fi `isExtensionOf`) files
+                 return $ map takeBaseName audios
+

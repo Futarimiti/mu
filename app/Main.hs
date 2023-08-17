@@ -6,7 +6,7 @@ import           Control.Monad.Trans.Maybe (MaybeT (runMaybeT))
 import           Options                   (parseArgs)
 
 main :: IO ()
-main = do action <- parseArgs
-          Just userConfig <- runMaybeT getUserConfig
+main = do Just userConfig <- runMaybeT getUserConfig
+          action <- parseArgs userConfig
           runCommand userConfig action
 

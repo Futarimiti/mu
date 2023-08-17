@@ -8,9 +8,8 @@ import           Lib
 import           Messages              (Messages (..), messages)
 import           Player                (Player (play))
 import           Prelude               hiding (log)
-import           System.Directory      (doesFileExist, listDirectory)
-import           System.FilePath       (isExtensionOf, takeBaseName, (<.>),
-                                        (</>))
+import           System.Directory      (doesFileExist)
+import           System.FilePath       ((<.>), (</>))
 import           System.Random.Shuffle (shuffleM)
 
 playSeq :: Config -> [SongName] -> IO ()
@@ -28,7 +27,5 @@ play1 Config {..} song = do songFileExt <- audioFileExt <$> fileinfo
                                               log (songNotExist mess song)
 
 shuffle :: Config -> IO ()
-shuffle c@(Config {..}) = do files <- listDirectory musicDir
-                             fi <- fileinfo
-                             randomAudioFiles <- shuffleM $ filter (audioFileExt fi `isExtensionOf`) files
-                             playSeq c (map takeBaseName randomAudioFiles)
+shuffle c@(Config {..}) = do shuffledAudioBasenames <- shuffleM =<< songsIn musicDir
+                             playSeq c shuffledAudioBasenames
