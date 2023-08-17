@@ -12,6 +12,7 @@ data FileInfo = FileInfo { updateFilename    :: FilePath
                          , updateFileFormat  :: String
                          , serialiseDataPath :: FilePath  -- NOTE: NEED TO PREPEND XDG_DATA_HOME
                          , audioFileExt      :: String
+                         , configFilePath    :: FilePath  -- NOTE: NEED TO PREPEND XDG_CONFIG_HOME
                          } deriving (Generic, FromDhall)
 
 fileinfo :: IO FileInfo

@@ -5,5 +5,6 @@
 , beginDownload = \(songname : Text) -> \(url : Text) -> "Downloading song \"${songname}\" from ${url}..."
 , beginDelete = \(songname : Text) -> "Deleting song \"${songname}\"..."
 , beginReinstall = \(songname : Text) -> \(url : Text) -> "Reinstalling song \"${songname}\" from ${url}..."
+, illegalEmptyCommand = "Illegal empty list provided as command"
 }
 

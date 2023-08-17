@@ -14,12 +14,15 @@ import           Data.Map                   (Map, filterWithKey, intersection,
                                              keys, (!), (\\))
 import           Data.Maybe                 (catMaybes)
 import           Data.Text                  (Text)
-import           System.Directory           (doesDirectoryExist)
+import           System.Directory           (createDirectoryIfMissing,
+                                             doesDirectoryExist)
 import           System.Environment         (lookupEnv)
-import           System.FilePath            ((</>))
+import           System.FilePath            (takeDirectory, (</>))
 import           System.IO                  (hPutStrLn, stderr)
 import           Text.Printf                (printf)
 
+-- | Command and options/args
+type Command = [String]
 type SongName = String
 type URL = FilePath
 type OS = String
@@ -29,7 +32,8 @@ deserialiseMap :: (Ord a, Serialise a, Serialise b) => FilePath -> IO (Map a b)
 deserialiseMap = readFileDeserialise
 
 serialiseMap :: (Ord a, Serialise a, Serialise b) => Map a b -> FilePath -> IO ()
-serialiseMap = flip writeFileSerialise
+serialiseMap m f = do createDirectoryIfMissing True (takeDirectory f)
+                      writeFileSerialise f m
 
 xdgMusicDirs :: [MaybeT IO FilePath]
 xdgMusicDirs = [ do xdgMusic <- MaybeT $ lookupEnv "XDG_MUSIC_DIR"

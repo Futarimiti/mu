@@ -24,14 +24,16 @@ executable mu
                     , Commands
                     , Options
                     , Config
-                    , Config.Defaults
                     , Config.User
                     , Config.Parse
+                    , Config.Parse.Spec
                     , Editor
                     , Player
                     , Downloader
                     , Messages
                     , Update
+                    , Update.Manage
+                    , Update.Parse
                     , Play
                     , Paths_mu
                     , FileInfo

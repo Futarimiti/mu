@@ -1,15 +1,12 @@
 module Main where
 
-import           Commands        (runCommand)
-import           Config.Defaults (defaults)
-import           Config.User     (getUserConfig)
-import           Data.Maybe      (fromMaybe)
-import           Options         (parseArgs)
+import           Commands                  (runCommand)
+import           Config.User               (getUserConfig)
+import           Control.Monad.Trans.Maybe (MaybeT (runMaybeT))
+import           Options                   (parseArgs)
 
 main :: IO ()
 main = do action <- parseArgs
-          userConfig <- getUserConfig
-          defaultConfig <- defaults
-          let config = fromMaybe defaultConfig userConfig
-          runCommand config action
+          Just userConfig <- runMaybeT getUserConfig
+          runCommand userConfig action
 
