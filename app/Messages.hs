@@ -16,6 +16,7 @@ data Messages = Messages { cannotInferDefaultPlayerByOS :: OS -> Text
                          , beginDelete                  :: SongName -> String
                          , beginReinstall               :: SongName -> URL -> String
                          , illegalEmptyCommand          :: String
+                         , songNotExist                 :: SongName -> String
                          } deriving (Generic, FromDhall)
 
 messages :: IO Messages

@@ -50,5 +50,6 @@ executable mu
                     , bytestring
                     , containers
                     , serialise
+                    , random-shuffle
     hs-source-dirs:   app, src
     default-language: GHC2021
