@@ -21,7 +21,7 @@ play1 :: Config -> SongName -> IO ()
 play1 Config {..} song = do songFileExt <- audioFileExt <$> fileinfo
                             let songFile = musicDir </> song <.> songFileExt
                             exists <- doesFileExist songFile
-                            if exists then do log ("-> " ++ song)
+                            if exists then do log' ("-> " ++ song)
                                               play player songFile
                                       else do mess <- messages
                                               log (songNotExist mess song)

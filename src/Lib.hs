@@ -73,7 +73,10 @@ type LogT m a = WriterT (DiffList String) m a
 -- log m = tell (toDiffList [m])
 
 log :: String -> IO ()
-log = hPutStrLn stderr
+log m = hPutStrLn stderr ("[mu] " ++ m)
+
+log' :: String -> IO ()
+log' = hPutStrLn stderr
 
 runLogT :: Functor m => LogT m a -> m (a, [String])
 runLogT m = second fromDiffList <$> runWriterT m
