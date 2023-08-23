@@ -9,13 +9,13 @@ import           Prelude hiding (log)
 import           Update  (update)
 
 -- | Functionalities parsed from commandline args
-data MuCommand = Play [SongName]  -- | Play songs sequentially
-               | Shuffle          -- | Shuffle through the library
-               | Update           -- | Update library
+data MuCommand = Play [SongName]     -- | Play songs sequentially
+               | Shuffle [SongName]  -- | Shuffle through the library, or specified songs
+               | Update              -- | Update library
                deriving (Show, Eq, Read)
 
 runCommand :: Config -> MuCommand -> IO ()
-runCommand c = \case (Play songs) -> playSeq c songs
-                     Shuffle -> shuffle c
-                     Update -> update c
+runCommand c = \case Play songs    -> playSeq c songs
+                     Shuffle songs -> shuffle c songs
+                     Update        -> update c
 

@@ -1,4 +1,5 @@
 {-# LANGUAGE RecordWildCards #-}
+
 module Options (parseArgs) where
 
 import           Commands            (MuCommand (..))
@@ -9,7 +10,7 @@ import           Options.Applicative (Parser, ParserInfo, argument, asum,
                                       completer, execParser, flag', fullDesc,
                                       header, help, helper, info,
                                       listIOCompleter, long, metavar, progDesc,
-                                      short, str)
+                                      short, str, strOption)
 
 -- | Parse command line arguments into @MuCommand@
 parseArgs :: Config -> IO MuCommand
@@ -24,10 +25,10 @@ opts c = info (helper <*> commandParser c) $ mconcat [ fullDesc
 -- parsers
 
 commandParser :: Config -> Parser MuCommand
-commandParser c = asum [shuffleParser, playParser c, updateParser, emptyParser]
+commandParser c = asum [shuffleParser c, playParser c, updateParser, emptyParser]
 
 emptyParser :: Parser MuCommand
-emptyParser = pure Shuffle
+emptyParser = pure (Shuffle [])
 
 updateParser :: Parser MuCommand
 updateParser = flag' Update $ mconcat [ long "update"
@@ -41,8 +42,9 @@ playParser Config {..} = Play <$> some (argument str $ mconcat [ metavar "SONGS"
                                                                , completer (listIOCompleter (songsIn musicDir))
                                                                ])
 
-shuffleParser :: Parser MuCommand
-shuffleParser = flag' Shuffle $ mconcat [ long "shuffle"
-                                        , help "Shuffle through all the somes in the library"
-                                        ]
-
+shuffleParser :: Config -> Parser MuCommand
+shuffleParser Config {..} = Shuffle <$> many (strOption $ mconcat [ long "shuffle"
+                                                                  , metavar "[SONGS]"
+                                                                  , completer (listIOCompleter (songsIn musicDir))
+                                                                  , help "Shuffle through specified songs, or the entire library"
+                                                                  ])

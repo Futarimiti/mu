@@ -26,6 +26,6 @@ play1 Config {..} song = do songFileExt <- audioFileExt <$> fileinfo
                                       else do mess <- messages
                                               log (songNotExist mess song)
 
-shuffle :: Config -> IO ()
-shuffle c@(Config {..}) = do shuffledAudioBasenames <- shuffleM =<< songsIn musicDir
-                             playSeq c shuffledAudioBasenames
+shuffle :: Config -> [SongName] -> IO ()
+shuffle c@(Config {..}) []    = songsIn musicDir >>= shuffleM >>= playSeq c
+shuffle c               songs = shuffleM songs >>= playSeq c
