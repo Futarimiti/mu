@@ -21,8 +21,9 @@ update :: Config -> IO ()
 update c = do fi <- fileinfo
               let tempFileTemplate = fi.updateFilename <.> fi.updateFileExt
               withSystemTempFile tempFileTemplate $ \f _ -> do
-                hasSerialisedData <- doesFileExist =<< getXdgDirectory XdgData fi.serialiseDataPath
-                oldMap <- if hasSerialisedData then getXdgDirectory XdgData fi.serialiseDataPath >>= deserialiseMap
+                mapPath <- getXdgDirectory XdgData fi.serialiseDataPath
+                hasSerialisedData <- doesFileExist mapPath
+                oldMap <- if hasSerialisedData then deserialiseMap mapPath
                                                else return M.empty
 
                 encodeFile f oldMap
