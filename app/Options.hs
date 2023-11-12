@@ -1,31 +1,34 @@
-{-# LANGUAGE RecordWildCards #-}
-
 module Options (parseArgs) where
 
-import           Commands            (MuCommand (..))
-import           Config              (Config (Config, musicDir))
-import           Control.Applicative (Alternative (..))
-import           Lib                 (songsIn)
-import           Options.Applicative (Parser, ParserInfo, argument, asum,
-                                      completer, execParser, flag', fullDesc,
-                                      header, help, helper, info,
-                                      listIOCompleter, long, metavar, progDesc,
-                                      short, str, strOption)
+import           Commands                   (MuCommand (..))
+import           Config                     (Config (..))
+import           Control.Applicative        (Alternative (..))
+import           Control.Monad.Trans.Class  (MonadTrans (lift))
+import           Control.Monad.Trans.Reader (ReaderT, ask)
+import           Lib                        (songsIn)
+import           Options.Applicative        (Parser, ParserInfo, argument, asum,
+                                             completer, execParser, flag',
+                                             fullDesc, header, help, helper,
+                                             info, listIOCompleter, long,
+                                             metavar, progDesc, short, str,
+                                             strOption)
 
--- | Parse command line arguments into @MuCommand@
-parseArgs :: Config -> IO MuCommand
-parseArgs = execParser . opts
+parseArgs :: ReaderT Config IO MuCommand
+parseArgs = optsT >>= lift . execParser
 
-opts :: Config -> ParserInfo MuCommand
-opts c = info (helper <*> commandParser c) $ mconcat [ fullDesc
-                                                     , header "mu - a command line music player & downloader"
-                                                     , progDesc "Play and manage songs"
-                                                     ]
+optsT :: Monad m => ReaderT Config m (ParserInfo MuCommand)
+optsT = do parser <- commandParserT
+           return $ info (helper <*> parser) $ mconcat [ fullDesc
+                                                       , header "mu - a command line music player & downloader"
+                                                       , progDesc "Play and manage songs"
+                                                       ]
 
 -- parsers
 
-commandParser :: Config -> Parser MuCommand
-commandParser c = asum [shuffleParser c, playParser c, updateParser, emptyParser]
+commandParserT :: Monad m => ReaderT Config m (Parser MuCommand)
+commandParserT = do play <- playParserT
+                    shuffle <- shuffleParserT
+                    return $ asum [play, shuffle, updateParser, emptyParser]
 
 emptyParser :: Parser MuCommand
 emptyParser = pure (Shuffle [])
@@ -37,14 +40,16 @@ updateParser = flag' Update $ mconcat [ long "update"
                                       , help "Perform an update"
                                       ]
 
-playParser :: Config -> Parser MuCommand
-playParser Config {..} = Play <$> some (argument str $ mconcat [ metavar "SONGS"
-                                                               , completer (listIOCompleter (songsIn musicDir))
-                                                               ])
+playParserT :: Monad m => ReaderT Config m (Parser MuCommand)
+playParserT = do c <- ask
+                 pure $ Play <$> some (argument str $ mconcat [ metavar "SONGS"
+                                                              , completer (listIOCompleter (songsIn (musicDir c)))
+                                                              ])
 
-shuffleParser :: Config -> Parser MuCommand
-shuffleParser Config {..} = Shuffle <$> many (strOption $ mconcat [ long "shuffle"
-                                                                  , metavar "[SONGS]"
-                                                                  , completer (listIOCompleter (songsIn musicDir))
-                                                                  , help "Shuffle through specified songs, or the entire library"
-                                                                  ])
+shuffleParserT :: Monad m => ReaderT Config m (Parser MuCommand)
+shuffleParserT = do c <- ask
+                    pure $ Shuffle <$> many (strOption $ mconcat [ long "shuffle"
+                                                                 , metavar "[SONGS]"
+                                                                 , completer (listIOCompleter (songsIn (musicDir c)))
+                                                                 , help "Shuffle through specified songs, or the entire library"
+                                                                 ])
