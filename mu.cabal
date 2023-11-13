@@ -37,6 +37,7 @@ executable mu
                     , Play
                     , Paths_mu
                     , FileInfo
+                    , Global
     build-depends:    base ^>=4.17.1.0
                     , optparse-applicative
                     , transformers ^>=0.6.0.0
