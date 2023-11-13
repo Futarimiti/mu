@@ -7,6 +7,7 @@ import           Codec.Serialise            (Serialise, readFileDeserialise,
 import           Control.Monad              (guard)
 import           Control.Monad.Trans.Class  (MonadTrans (..))
 import           Control.Monad.Trans.Maybe  (MaybeT (..))
+import           Control.Monad.Trans.Reader (ReaderT, asks)
 import           Control.Monad.Trans.Writer (WriterT (runWriterT))
 import           Data.Bifunctor             (Bifunctor (second))
 import           Data.List                  (intercalate)
@@ -14,7 +15,7 @@ import           Data.Map                   (Map, filterWithKey, intersection,
                                              keys, (!), (\\))
 import           Data.Maybe                 (catMaybes)
 import           Data.Text                  (Text)
-import           FileInfo                   (FileInfo (..), fileinfo)
+import           FileInfo                   (FileInfo (..))
 import           System.Directory           (createDirectoryIfMissing,
                                              doesDirectoryExist, listDirectory)
 import           System.Environment         (lookupEnv)
@@ -104,10 +105,8 @@ prettyPrintChanges Changes {..} = intercalate "\n" . catMaybes $ [newSongs, modi
         template _ [] = Nothing
         template prompt items = Just $ printf "%s: [%s]" prompt (intercalate ", " items)
 
-songsIn :: FilePath  -- dir
-        -> IO [String]  -- basenames
-songsIn dir = do files <- listDirectory dir
-                 fi <- fileinfo
-                 let audios = filter (audioFileExt fi `isExtensionOf`) files
-                 return $ map takeBaseName audios
-
+songsIn :: Monad m => ReaderT FileInfo m (FilePath -> IO [String])  -- basenames
+songsIn = do ext <- asks audioFileExt
+             return $ \dir -> do files <- listDirectory dir
+                                 let audios = filter (ext `isExtensionOf`) files
+                                 return $ map takeBaseName audios

@@ -4,7 +4,8 @@ import           Commands                   (MuCommand (..))
 import           Config                     (Config (..))
 import           Control.Applicative        (Alternative (..))
 import           Control.Monad.Trans.Class  (MonadTrans (lift))
-import           Control.Monad.Trans.Reader (ReaderT, ask)
+import           Control.Monad.Trans.Reader (ReaderT, asks, withReaderT)
+import           Global                     (Global (config, fileinfo))
 import           Lib                        (songsIn)
 import           Options.Applicative        (Parser, ParserInfo, argument, asum,
                                              completer, execParser, flag',
@@ -13,10 +14,10 @@ import           Options.Applicative        (Parser, ParserInfo, argument, asum,
                                              metavar, progDesc, short, str,
                                              strOption)
 
-parseArgs :: ReaderT Config IO MuCommand
+parseArgs :: ReaderT Global IO MuCommand
 parseArgs = optsT >>= lift . execParser
 
-optsT :: Monad m => ReaderT Config m (ParserInfo MuCommand)
+optsT :: Monad m => ReaderT Global m (ParserInfo MuCommand)
 optsT = do parser <- commandParserT
            return $ info (helper <*> parser) $ mconcat [ fullDesc
                                                        , header "mu - a command line music player & downloader"
@@ -25,7 +26,7 @@ optsT = do parser <- commandParserT
 
 -- parsers
 
-commandParserT :: Monad m => ReaderT Config m (Parser MuCommand)
+commandParserT :: Monad m => ReaderT Global m (Parser MuCommand)
 commandParserT = do play <- playParserT
                     shuffle <- shuffleParserT
                     return $ asum [play, shuffle, updateParser, emptyParser]
@@ -40,16 +41,18 @@ updateParser = flag' Update $ mconcat [ long "update"
                                       , help "Perform an update"
                                       ]
 
-playParserT :: Monad m => ReaderT Config m (Parser MuCommand)
-playParserT = do c <- ask
+playParserT :: Monad m => ReaderT Global m (Parser MuCommand)
+playParserT = do mdir <- asks (musicDir . config)
+                 songsIO <- ($ mdir) <$> withReaderT fileinfo songsIn
                  pure $ Play <$> some (argument str $ mconcat [ metavar "SONGS"
-                                                              , completer (listIOCompleter (songsIn (musicDir c)))
+                                                              , completer (listIOCompleter songsIO)
                                                               ])
 
-shuffleParserT :: Monad m => ReaderT Config m (Parser MuCommand)
-shuffleParserT = do c <- ask
+shuffleParserT :: Monad m => ReaderT Global m (Parser MuCommand)
+shuffleParserT = do mdir <- asks (musicDir . config)
+                    songsIO <- ($ mdir) <$> withReaderT fileinfo songsIn
                     pure $ Shuffle <$> many (strOption $ mconcat [ long "shuffle"
                                                                  , metavar "[SONGS]"
-                                                                 , completer (listIOCompleter (songsIn (musicDir c)))
+                                                                 , completer (listIOCompleter songsIO)
                                                                  , help "Shuffle through specified songs, or the entire library"
                                                                  ])

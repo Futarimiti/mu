@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveAnyClass #-}
 
-module Messages where
+module Messages (Messages(..), messages) where
 
 import           Data.Text    (Text, pack)
 import           Dhall        (FromDhall, auto, input)
