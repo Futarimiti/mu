@@ -2,12 +2,11 @@
 
 module Commands (runCommand, MuCommand(..)) where
 
-import           Control.Monad.Trans.Reader (runReader)
-import           Global
+import           Config  (Config)
 import           Lib
-import           Play                       (playSeq, shuffle)
-import           Prelude                    hiding (log)
-import           Update                     (update)
+import           Play    (playSeq, shuffle)
+import           Prelude hiding (log)
+import           Update  (update)
 
 -- | Functionalities parsed from commandline args
 data MuCommand = Play [SongName]     -- | Play songs sequentially
@@ -15,8 +14,8 @@ data MuCommand = Play [SongName]     -- | Play songs sequentially
                | Update              -- | Update library
                deriving (Show, Eq, Read)
 
-runCommand :: Global -> MuCommand -> IO ()
-runCommand g = \case Play songs    -> playSeq g songs
-                     Shuffle songs -> runReader shuffle g songs
-                     Update        -> update g
+runCommand :: Config -> MuCommand -> IO ()
+runCommand c = \case Play songs    -> playSeq c songs
+                     Shuffle songs -> shuffle c songs
+                     Update        -> update c
 
