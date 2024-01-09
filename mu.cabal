@@ -1,56 +1,62 @@
-cabal-version:      3.0
-name:               mu
-version:            0.1.0.0
-synopsis:           Command line music player
-homepage:           https://github.com/Futarimiti/mu
-license:            MIT
-license-file:       LICENSE
-author:             Futar
-maintainer:         Futarimiti@163.com
-category:           Sound
-build-type:         Simple
-extra-doc-files:    README.md
-data-dir:           resources
-data-files:         messages.dhall
-                  , fileinfo.dhall
+cabal-version:   3.0
+name:            mu
+version:         0.1.0.0
+synopsis:        Command line music player
+homepage:        https://github.com/Futarimiti/mu
+license:         MIT
+license-file:    LICENSE
+author:          Futar
+maintainer:      Futarimiti@163.com
+category:        Sound
+build-type:      Simple
+extra-doc-files: README.md
+data-dir:        resources
+data-files:
+  fileinfo.dhall
+  messages.dhall
 
 common warnings
-    ghc-options: -Wall -Wmonomorphism-restriction
+  ghc-options: -Wall -Wmonomorphism-restriction
 
 executable mu
-    import:           warnings
-    main-is:          Main.hs
-    other-modules:    Lib
-                    , Commands
-                    , Options
-                    , Config
-                    , Config.User
-                    , Config.Parse
-                    , Config.Parse.Spec
-                    , Editor
-                    , Player
-                    , Downloader
-                    , Messages
-                    , Update
-                    , Update.Manage
-                    , Update.Parse
-                    , Play
-                    , Paths_mu
-                    , FileInfo
-                    , Global
-    build-depends:    base ^>=4.17.1.0
-                    , optparse-applicative
-                    , transformers ^>=0.6.0.0
-                    , dhall
-                    , process
-                    , text
-                    , directory
-                    , filepath
-                    , temporary
-                    , yaml
-                    , bytestring
-                    , containers
-                    , serialise
-                    , random-shuffle
-    hs-source-dirs:   app, src
-    default-language: GHC2021
+  import:             warnings
+  main-is:            Main.hs
+  default-extensions: StrictData
+  other-modules:
+    Commands
+    Config
+    Config.Parse
+    Config.Parse.Spec
+    Config.User
+    Downloader
+    Editor
+    FileInfo
+    Global
+    Lib
+    Messages
+    Options
+    Paths_mu
+    Play
+    Player
+    Update
+    Update.Manage
+    Update.Parse
+
+  build-depends:
+    , base                  ^>=4.17.1.0
+    , bytestring
+    , containers
+    , dhall
+    , directory
+    , filepath
+    , optparse-applicative
+    , process
+    , random-shuffle
+    , serialise
+    , temporary
+    , text
+    , transformers          ^>=0.6.0.0
+    , yaml
+
+  hs-source-dirs:     app src
+  default-language:   GHC2021
