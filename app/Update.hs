@@ -15,6 +15,7 @@ import           Lib
 import           Prelude                    hiding (log)
 import           System.Directory           (XdgDirectory (XdgData),
                                              doesFileExist, getXdgDirectory)
+import           System.Exit                (exitFailure)
 import           System.FilePath            ((<.>))
 import           System.IO.Temp             (withSystemTempFile)
 import           Update.Manage              (manageSongs)
@@ -32,7 +33,10 @@ update g@(Global {..}) = do let fi = fileinfo
                               _ <- config.editor.edit f
                               e <- runExceptT $ decodeFile f
                               case e of
-                                Left err -> error (unpack err)
+                                Left err -> do
+                                  let msg = unpack err
+                                  log $ unlines ["Syntax error in parsing yaml:", msg, "Failed, nothing changed"]
+                                  exitFailure
                                 Right newMap -> do
                                   let changes = oldMap `compareTo` newMap
                                   log (prettyPrintChanges changes)
