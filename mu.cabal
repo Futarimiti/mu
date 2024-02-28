@@ -44,6 +44,7 @@ executable mu
     Update
     Update.Manage
     Update.Parse
+    Update.Serialisation
 
   build-depends:
     , base                  ^>=4.17.1.0
