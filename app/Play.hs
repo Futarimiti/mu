@@ -4,7 +4,7 @@ module Play (playSeq, shuffle, playSeqLogged, shuffleLogged) where
 
 import           Config                 (Config (..))
 import           Control.Monad.IO.Class (MonadIO (liftIO))
-import           Control.Monad.Logger   (LoggingT, logInfoN)
+import           Control.Monad.Logger   (LoggingT, logErrorN, logInfoN)
 import           Control.Monad.Reader   (ReaderT, ask, asks, runReaderT,
                                          withReaderT)
 import qualified Data.Text              as T
@@ -43,7 +43,7 @@ play1Logged song = do fi <- asks fileinfo
                       exists <- liftIO $ doesFileExist songFile
                       if exists then do logInfoN ("-> " <> T.pack song)
                                         liftIO $ config.player.play songFile
-                                else do logInfoN $ T.pack (notExist song)
+                                else do logErrorN $ T.pack (notExist song)
 
 shuffle :: MonadIO m => [SongName] -> ReaderT Global m ()
 shuffle list = do g <- ask
