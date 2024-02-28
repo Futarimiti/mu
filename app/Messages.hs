@@ -2,11 +2,12 @@
 
 module Messages (Messages(..), messages) where
 
-import           Data.Text    (Text, pack)
-import           Dhall        (FromDhall, auto, input)
-import           GHC.Generics (Generic)
+import           Control.Monad.IO.Class (MonadIO (liftIO))
+import           Data.Text              (Text, pack)
+import           Dhall                  (FromDhall, auto, input)
+import           GHC.Generics           (Generic)
 import           Lib
-import           Paths_mu     (getDataFileName)
+import           Paths_mu               (getDataFileName)
 
 data Messages = Messages { cannotInferDefaultPlayerByOS :: OS -> Text
                          , cannotInferMusicDir          :: Text
@@ -19,5 +20,5 @@ data Messages = Messages { cannotInferDefaultPlayerByOS :: OS -> Text
                          , songNotExist                 :: SongName -> String
                          } deriving (Generic, FromDhall)
 
-messages :: IO Messages
-messages = getDataFileName "messages.dhall" >>= input auto . pack
+messages :: MonadIO io => io Messages
+messages = liftIO (getDataFileName "messages.dhall" >>= input auto . pack)

@@ -2,21 +2,22 @@
 
 module Update.Parse (decodeFile, encodeFile) where
 
-import           Control.Arrow              (ArrowChoice (left))
-import           Control.Monad.Trans.Class  (MonadTrans (lift))
-import           Control.Monad.Trans.Except (ExceptT (..))
-import           Data.Map                   (Map)
-import           Data.Text                  (pack, unpack)
-import           Data.Yaml                  (decodeFileEither,
-                                             prettyPrintParseException)
-import qualified Data.Yaml                  as Y
-import           FileInfo                   (FileInfo (..), fileinfo)
+import           Control.Arrow             (ArrowChoice (left))
+import           Control.Monad.Except      (ExceptT (..))
+import           Control.Monad.IO.Class    (MonadIO (liftIO))
+import           Control.Monad.Trans.Class (MonadTrans (lift))
+import           Data.Map                  (Map)
+import           Data.Text                 (pack, unpack)
+import           Data.Yaml                 (decodeFileEither,
+                                            prettyPrintParseException)
+import qualified Data.Yaml                 as Y
+import           FileInfo                  (FileInfo (..), fileinfo)
 import           Lib
-import           Messages                   (Messages (notSupportedUpdateFileFormat),
-                                             messages)
+import           Messages                  (Messages (notSupportedUpdateFileFormat),
+                                            messages)
 
 -- | Decode a config format from a file into songname-url map
-decodeFile :: FilePath -> ExceptT ErrorMessage IO (Map SongName URL)
+decodeFile :: MonadIO io => FilePath -> ExceptT ErrorMessage io (Map SongName URL)
 decodeFile f = do fi <- lift fileinfo
                   let format = updateFileFormat fi
                   case format of
@@ -26,17 +27,18 @@ decodeFile f = do fi <- lift fileinfo
 
 -- | Encode songname-url map in a human readable config format
 -- and save to the given file
-encodeFile :: FilePath  -- dest
+encodeFile :: MonadIO io
+           => FilePath  -- dest
            -> Map SongName URL
-           -> IO ()
+           -> io ()
 encodeFile f m = do fi <- fileinfo
                     let format = updateFileFormat fi
                     case format of
-                      "yaml" -> Y.encodeFile f m
+                      "yaml" -> liftIO $ Y.encodeFile f m
                       _ -> do mess <- messages
                               error . unpack $ notSupportedUpdateFileFormat mess format
 
 --- impl
 
-decodeYamlExceptT :: FilePath -> ExceptT ErrorMessage IO (Map SongName URL)
-decodeYamlExceptT f = ExceptT $ left (pack . prettyPrintParseException) <$> decodeFileEither f
+decodeYamlExceptT :: MonadIO io => FilePath -> ExceptT ErrorMessage io (Map SongName URL)
+decodeYamlExceptT f = ExceptT $ left (pack . prettyPrintParseException) <$> liftIO (decodeFileEither f)

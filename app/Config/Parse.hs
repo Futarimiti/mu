@@ -1,8 +1,9 @@
 module Config.Parse (parseFile) where
 
-import           Config            (Config)
-import           Config.Parse.Spec (parseSpec, specToConfig)
+import           Config                 (Config)
+import           Config.Parse.Spec      (parseSpec, specToConfig)
+import           Control.Monad.IO.Class (MonadIO)
 
-parseFile :: FilePath -> IO Config
+parseFile :: MonadIO io => FilePath -> io Config
 parseFile f = specToConfig <$> parseSpec f
 

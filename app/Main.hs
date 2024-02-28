@@ -1,13 +1,13 @@
 module Main (main) where
 
-import           Commands                   (runCommand)
-import           Config.User                (getUserConfig)
-import           Control.Monad.Trans.Maybe  (MaybeT (runMaybeT))
-import           Control.Monad.Trans.Reader (ReaderT (runReaderT))
-import           FileInfo                   (fileinfo)
-import           Global                     (Global (Global))
-import           Messages                   (messages)
-import           Options                    (parseArgs)
+import           Commands                  (runCommand)
+import           Config.User               (getUserConfig)
+import           Control.Monad.Reader      (ReaderT (runReaderT))
+import           Control.Monad.Trans.Maybe (MaybeT (runMaybeT))
+import           FileInfo                  (fileinfo)
+import           Global                    (Global (Global))
+import           Messages                  (messages)
+import           Options                   (parseArgs)
 
 main :: IO ()
 main = do fi <- fileinfo

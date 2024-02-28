@@ -21,7 +21,10 @@ common warnings
 executable mu
   import:             warnings
   main-is:            Main.hs
-  default-extensions: StrictData
+  default-extensions:
+    OverloadedStrings
+    StrictData
+
   other-modules:
     Commands
     Config
@@ -48,7 +51,10 @@ executable mu
     , containers
     , dhall
     , directory
+    , exceptions
     , filepath
+    , monad-logger
+    , mtl
     , optparse-applicative
     , process
     , random-shuffle
