@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveAnyClass #-}
 
-module FileInfo (FileInfo(..), fileinfo) where
+module FileInfo (FileInfo(..), fileinfo, parseFile) where
 
 import           Control.Monad.IO.Class (MonadIO (liftIO))
 import           Data.Text              (pack)
@@ -16,5 +16,9 @@ data FileInfo = FileInfo { updateFilename    :: FilePath
                          , configFilePath    :: FilePath  -- NOTE: NEED TO PREPEND XDG_CONFIG_HOME
                          } deriving (Generic, FromDhall)
 
+{-# DEPRECATED fileinfo "inject fileinfo from Global instead" #-}
 fileinfo :: MonadIO io => io FileInfo
 fileinfo = liftIO (getDataFileName "fileinfo.dhall" >>= input auto . pack)
+
+parseFile :: MonadIO io => FilePath -> io FileInfo
+parseFile = liftIO . input auto . pack

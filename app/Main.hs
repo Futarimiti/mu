@@ -1,18 +1,19 @@
 module Main (main) where
 
 import           Commands                  (runCommand)
-import           Config.User               (getUserConfig)
+import           Config.User               (getUserConfig')
 import           Control.Monad.Reader      (ReaderT (runReaderT))
 import           Control.Monad.Trans.Maybe (MaybeT (runMaybeT))
-import           FileInfo                  (fileinfo)
+import qualified FileInfo                  (parseFile)
 import           Global                    (Global (Global))
-import           Messages                  (messages)
+import qualified Messages                  (parseFile)
 import           Options                   (parseArgs)
+import           Paths_mu                  (getDataFileName)
 
 main :: IO ()
-main = do fi <- fileinfo
-          mess <- messages
-          Just c <- runMaybeT getUserConfig
+main = do fi <- getDataFileName "fileinfo.dhall" >>= FileInfo.parseFile
+          mess <- getDataFileName "messages.dhall" >>= Messages.parseFile
+          Just c <- runMaybeT (getUserConfig' fi)
           let g = Global c fi mess
           action <- runReaderT parseArgs g
           runCommand g action

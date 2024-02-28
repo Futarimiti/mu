@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveAnyClass #-}
 
-module Messages (Messages(..), messages) where
+module Messages (Messages(..), messages, parseFile) where
 
 import           Control.Monad.IO.Class (MonadIO (liftIO))
 import           Data.Text              (Text, pack)
@@ -20,5 +20,9 @@ data Messages = Messages { cannotInferDefaultPlayerByOS :: OS -> Text
                          , songNotExist                 :: SongName -> String
                          } deriving (Generic, FromDhall)
 
+{-# DEPRECATED messages "inject mess from Global instead" #-}
 messages :: MonadIO io => io Messages
 messages = liftIO (getDataFileName "messages.dhall" >>= input auto . pack)
+
+parseFile :: MonadIO io => FilePath -> io Messages
+parseFile = liftIO . input auto . pack
