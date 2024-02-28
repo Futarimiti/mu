@@ -90,6 +90,9 @@ data Changes a b = Changes { new      :: Map a b
                            , deleted  :: [a]
                            } deriving (Show, Eq)
 
+noChange :: Changes a b -> Bool
+noChange Changes {..} = null new && null modified && null deleted
+
 compareTo :: (Ord a, Eq b)
           => Map a b  -- old
           -> Map a b  -- new
