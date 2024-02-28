@@ -1,13 +1,13 @@
-{-# LANGUAGE LambdaCase #-}
+module Commands (runCommandLogged, MuCommand(..)) where
 
-module Commands (runCommand, MuCommand(..)) where
-
-import           Control.Monad.Reader (ReaderT (runReaderT))
-import           Global
-import           Lib
-import           Play                 (playSeq, shuffle)
+import           Control.Monad.Catch  (MonadMask)
+import           Control.Monad.Logger (LoggingT)
+import           Control.Monad.Reader (MonadIO, ReaderT (..))
+import           Global               (Global)
+import           Lib                  (SongName)
+import           Play                 (playSeqLogged, shuffleLogged)
 import           Prelude              hiding (log)
-import           Update               (update)
+import           Update               (updateLogged)
 
 -- | Functionalities parsed from commandline args
 data MuCommand = Play [SongName]     -- | Play songs sequentially
@@ -15,8 +15,7 @@ data MuCommand = Play [SongName]     -- | Play songs sequentially
                | Update              -- | Update library
                deriving (Show, Eq, Read)
 
-runCommand :: Global -> MuCommand -> IO ()
-runCommand g = \case Play songs    -> playSeq g songs
-                     Shuffle songs -> runReaderT (shuffle songs) g
-                     Update        -> update g
-
+runCommandLogged :: (MonadIO io, MonadMask io) => MuCommand -> ReaderT Global (LoggingT io) ()
+runCommandLogged (Play songs)    = playSeqLogged songs
+runCommandLogged (Shuffle songs) = shuffleLogged songs
+runCommandLogged Update          = updateLogged

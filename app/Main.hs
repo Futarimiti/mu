@@ -1,7 +1,8 @@
 module Main (main) where
 
-import           Commands                  (runCommand)
+import           Commands                  (runCommandLogged)
 import           Config.User               (getUserConfig)
+import           Control.Monad.Logger      (LoggingT, runStderrLoggingT)
 import           Control.Monad.Reader      (ReaderT (runReaderT))
 import           Control.Monad.Trans.Maybe (MaybeT (runMaybeT))
 import qualified FileInfo                  (parseFile)
@@ -16,4 +17,6 @@ main = do fi <- getDataFileName "fileinfo.dhall" >>= FileInfo.parseFile
           Just c <- runMaybeT (getUserConfig fi)
           let g = Global c fi mess
           action <- runReaderT parseArgs g
-          runCommand g action
+          let logs :: LoggingT IO ()
+              logs = runReaderT (runCommandLogged action) g
+          runStderrLoggingT logs
