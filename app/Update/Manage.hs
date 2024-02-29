@@ -4,17 +4,16 @@
 module Update.Manage (manageSongsLogged) where
 
 import           Config                 (Config (..))
-import           Control.Monad          (forM_, void)
+import           Control.Monad          (void)
 import           Control.Monad.IO.Class (MonadIO (liftIO))
 import           Control.Monad.Logger   (LoggingT, logInfoN)
 import           Control.Monad.Reader   (ReaderT, asks)
 import           Data.Map               (Map, traverseWithKey)
-import qualified Data.Text              as T
 import           Downloader             (Downloader (download))
 import           FileInfo               (FileInfo (..))
 import           Global                 (Global (..))
 import           Lib                    (Changes (..), SongName, URL)
-import           Messages               (Messages (beginDelete, beginDownload, beginReinstall))
+import           Messages               (Messages (..))
 import           System.Directory       (removeFile)
 import           System.FilePath        ((<.>), (</>))
 
@@ -25,32 +24,30 @@ manageSongsLogged Changes {..} = do removeSongsLogged deleted
                                     reinstallSongsLogged modified
 
 reinstallSongsLogged :: MonadIO io => Map SongName URL -> ReaderT Global (LoggingT io) ()
-reinstallSongsLogged m = do beginReinstall <- asks (beginReinstall . mess)
-                            void $ traverseWithKey (\song url -> do logInfoN $ T.pack $ beginReinstall song url
-                                                                    reinstallSong1Logged song url) m
+reinstallSongsLogged = void . traverseWithKey reinstallSong1Logged
 
 downloadSongsLogged :: MonadIO io => Map SongName URL -> ReaderT Global (LoggingT io) ()
-downloadSongsLogged m = do beginDL <- asks (beginDownload . mess)
-                           void $ traverseWithKey (\song url -> do logInfoN $ T.pack $ beginDL song url
-                                                                   downloadSong1Logged song url) m
+downloadSongsLogged = void . traverseWithKey downloadSong1Logged
 
 removeSongsLogged :: MonadIO io => [SongName] -> ReaderT Global (LoggingT io) ()
-removeSongsLogged list = do beginDel <- asks (beginDelete . mess)
-                            forM_ list $ \song -> do logInfoN $ T.pack $ beginDel song
-                                                     removeSong1Logged song
+removeSongsLogged = mapM_ removeSong1Logged
 
 removeSong1Logged :: MonadIO io => SongName -> ReaderT Global (LoggingT io) ()
 removeSong1Logged song = do mdir <- asks (musicDir . config)
                             ext <- asks (audioFileExt . fileinfo)
-                            logInfoN $ "Removing " <> T.pack song
-                            liftIO $ removeFile (mdir </> song <.> ext)
+                            beginDel <- asks (beginDelete . mess)
+                            let file = mdir </> song <.> ext
+                            logInfoN $ beginDel file
+                            liftIO $ removeFile file
 
 downloadSong1Logged :: MonadIO io => SongName -> URL -> ReaderT Global (LoggingT io) ()
 downloadSong1Logged song url = do mdir <- asks (musicDir . config)
                                   down <- asks (downloader . config)
                                   ext <- asks (audioFileExt . fileinfo)
-                                  logInfoN $ "Downloading " <> T.pack song
-                                  liftIO $ down.download url (mdir </> song <.> ext)
+                                  beginDown <- asks (beginDownload . mess)
+                                  let file = mdir </> song <.> ext
+                                  logInfoN $ beginDown song url
+                                  liftIO $ down.download url file
 
 reinstallSong1Logged :: MonadIO io => SongName -> URL -> ReaderT Global (LoggingT io) ()
 reinstallSong1Logged song url = do removeSong1Logged song
