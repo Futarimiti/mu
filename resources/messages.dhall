@@ -7,5 +7,6 @@
 , beginReinstall = \(songname : Text) -> \(url : Text) -> "Reinstalling song \"${songname}\" from ${url}..."
 , illegalEmptyCommand = "Illegal empty list provided as command"
 , songNotExist = \(songname : Text) -> "No such song: ${songname}"
+, currentPlaying = \(songname : Text) -> "-> ${songname}"
 }
 

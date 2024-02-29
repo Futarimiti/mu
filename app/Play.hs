@@ -6,7 +6,6 @@ import           Config                (Config (..))
 import           Control.Monad.Logger  (LoggingT, logErrorN, logInfoN)
 import           Control.Monad.Reader  (MonadIO (..), ReaderT, asks,
                                         withReaderT)
-import qualified Data.Text             as T
 import           FileInfo              (FileInfo (..))
 import           Global                (Global (..))
 import           Lib                   (SongName, songsIn)
@@ -25,9 +24,10 @@ play1Logged song = do fi <- asks fileinfo
                       notExist <- asks (songNotExist . mess)
                       let songFile = config.musicDir </> song <.> fi.audioFileExt
                       exists <- liftIO $ doesFileExist songFile
-                      if exists then do logInfoN ("-> " <> T.pack song)
+                      if exists then do currentPlay <- asks (currentPlaying . mess)
+                                        logInfoN (currentPlay song)
                                         liftIO $ config.player.play songFile
-                                else do logErrorN $ T.pack (notExist song)
+                                else do logErrorN (notExist song)
 
 -- | If given, shuffle through specified songs, otherwise shuffle through all songs
 shuffleLogged :: MonadIO io => [SongName] -> ReaderT Global (LoggingT io) ()

@@ -12,11 +12,12 @@ data Messages = Messages { cannotInferDefaultPlayerByOS :: OS -> Text
                          , cannotInferMusicDir          :: Text
                          , mustManuallySetDownloader    :: Text
                          , notSupportedUpdateFileFormat :: String -> Text
-                         , beginDownload                :: SongName -> URL -> String
-                         , beginDelete                  :: SongName -> String
-                         , beginReinstall               :: SongName -> URL -> String
-                         , illegalEmptyCommand          :: String
-                         , songNotExist                 :: SongName -> String
+                         , beginDownload                :: SongName -> URL -> Text
+                         , beginDelete                  :: SongName -> Text
+                         , beginReinstall               :: SongName -> URL -> Text
+                         , illegalEmptyCommand          :: Text
+                         , songNotExist                 :: SongName -> Text
+                         , currentPlaying               :: SongName -> Text
                          } deriving (Generic, FromDhall)
 
 parseFile :: MonadIO io => FilePath -> io Messages
