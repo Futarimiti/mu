@@ -42,6 +42,7 @@ executable mu
     Play
     Player
     Update
+    Update.Changes
     Update.Manage
     Update.Parse
     Update.Serialisation
