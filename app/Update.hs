@@ -9,7 +9,7 @@ import           Control.Monad.IO.Class (MonadIO (liftIO))
 import           Control.Monad.Logger   (LoggingT (..), logErrorN, logInfoN)
 import           Control.Monad.Reader   (MonadReader (ask),
                                          ReaderT (runReaderT), asks)
-import qualified Data.Text              as T
+import qualified Data.Text              as Text (unlines)
 import           Editor                 (Editor (..))
 import           FileInfo               (FileInfo (..))
 import           Global                 (Global (..))
@@ -37,7 +37,7 @@ updateLogged = do fi <- asks fileinfo
                     liftIO $ editor.edit f
                     decodeResult <- runExceptT $ runReaderT (decodeFile' f) g
                     case decodeResult of
-                      Left err -> logErrorN $ T.unlines ["Syntax error in parsing yaml:", err, "Failed, nothing changed"]
+                      Left err -> logErrorN $ Text.unlines ["Syntax error in parsing yaml:", err, "Failed, nothing changed"]
                       Right newMap -> do
                         let changes = oldMap `compareTo` newMap
                         logInfoN $ if noChange changes then "Nothing new"

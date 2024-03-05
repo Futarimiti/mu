@@ -9,7 +9,6 @@ import           Control.Monad.IO.Class    (MonadIO (..))
 import           Control.Monad.Trans.Class (MonadTrans (..))
 import           Control.Monad.Trans.Maybe (MaybeT)
 import           FileInfo                  (FileInfo (..))
-import           Prelude                   hiding (log)
 import           System.Directory          (XdgDirectory (..), doesFileExist,
                                             getXdgDirectory)
 

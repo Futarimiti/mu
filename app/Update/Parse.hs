@@ -12,28 +12,27 @@ import           Data.Map                  (Map)
 import           Data.Text                 (pack, unpack)
 import           Data.Yaml                 (decodeFileEither,
                                             prettyPrintParseException)
-import qualified Data.Yaml                 as Y
+import qualified Data.Yaml                 as Yaml (encodeFile)
 import           FileInfo                  (FileInfo (..))
-import           Global                    (Global)
-import qualified Global                    as G
-import           Lib
+import           Global                    (Global (..))
+import           Lib                       (ErrorMessage, SongName, URL)
 import           Messages                  (Messages (notSupportedUpdateFileFormat))
 
 -- | Decode a config format from a file into songname-url map
 decodeFile' :: MonadIO io => FilePath -> ReaderT Global (ExceptT ErrorMessage io) (Map SongName URL)
-decodeFile' f = do fi <- asks G.fileinfo
+decodeFile' f = do fi <- asks fileinfo
                    case fi.updateFileFormat of
                      "yaml" -> lift $ decodeYamlExceptT f
-                     _ -> do m <- asks G.mess
+                     _ -> do m <- asks mess
                              lift . ExceptT . return . Left $ notSupportedUpdateFileFormat m fi.updateFileFormat
 
 -- | Encode songname-url map in a human readable config format
 -- and save to the given file
 encodeFile' :: MonadIO io => FilePath -> Map SongName URL -> ReaderT Global io ()
-encodeFile' f m = do fi <- asks G.fileinfo
+encodeFile' f m = do fi <- asks fileinfo
                      case fi.updateFileFormat of
-                       "yaml" -> liftIO $ Y.encodeFile f m
-                       _ -> do mess <- asks G.mess
+                       "yaml" -> liftIO $ Yaml.encodeFile f m
+                       _ -> do mess <- asks mess
                                error . unpack $ notSupportedUpdateFileFormat mess fi.updateFileFormat
 
 --- impl
