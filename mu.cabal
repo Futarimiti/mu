@@ -66,5 +66,5 @@ executable mu
     , transformers          ^>=0.6.0.0
     , yaml
 
-  hs-source-dirs:     app src
+  hs-source-dirs:     app
   default-language:   GHC2021
