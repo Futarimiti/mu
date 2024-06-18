@@ -1,23 +1,22 @@
 module Options (parseArgs) where
 
-import           Commands                  (MuCommand (..))
-import           Config                    (Config (..))
-import           Control.Applicative       (Alternative (..))
-import           Control.Monad.IO.Class    (MonadIO)
-import           Control.Monad.Reader      (ReaderT, asks, withReaderT)
-import           Control.Monad.Trans.Class (MonadTrans (lift))
-import           Global                    (Global (config, fileinfo))
-import           Lib                       (songsIn)
-import           Options.Applicative       (Parser, ParserInfo, argument, asum,
-                                            completer, execParser, flag',
-                                            fullDesc, header, help, helper,
-                                            info, listCompleter, long, metavar,
-                                            progDesc, short, str, strOption)
+import           Commands               (MuCommand (..))
+import           Config                 (Config (..))
+import           Control.Applicative    (Alternative (..))
+import           Control.Monad.IO.Class (MonadIO (..))
+import           Control.Monad.Reader   (MonadReader, asks)
+import           Global                 (Global (..))
+import           Lib                    (songsIn)
+import           Options.Applicative    (Parser, ParserInfo, argument, asum,
+                                         completer, execParser, flag', fullDesc,
+                                         header, help, helper, info,
+                                         listCompleter, long, metavar, progDesc,
+                                         short, str, strOption)
 
-parseArgs :: ReaderT Global IO MuCommand
-parseArgs = optsT >>= lift . execParser
+parseArgs :: (MonadIO m, MonadReader Global m) => m MuCommand
+parseArgs = optsT >>= (liftIO . execParser)
 
-optsT :: MonadIO m => ReaderT Global m (ParserInfo MuCommand)
+optsT :: (MonadIO m, MonadReader Global m) => m (ParserInfo MuCommand)
 optsT = do parser <- commandParserT
            return $ info (helper <*> parser) $ mconcat
              [ fullDesc
@@ -27,7 +26,7 @@ optsT = do parser <- commandParserT
 
 -- parsers
 
-commandParserT :: MonadIO m => ReaderT Global m (Parser MuCommand)
+commandParserT :: (MonadIO m, MonadReader Global m) => m (Parser MuCommand)
 commandParserT = do play <- playParserT
                     shuffle <- shuffleParserT
                     return $ asum [play, shuffle, updateParser, emptyParser]
@@ -43,17 +42,17 @@ updateParser = flag' Update $ mconcat
   , help "Perform an update"
   ]
 
-playParserT :: MonadIO m => ReaderT Global m (Parser MuCommand)
+playParserT :: (MonadIO m, MonadReader Global m) => m (Parser MuCommand)
 playParserT = do mdir <- asks (musicDir . config)
-                 songs <- withReaderT fileinfo (songsIn mdir)
+                 songs <- songsIn mdir
                  pure $ Play <$> some (argument str $ mconcat
                    [ metavar "SONGS"
                    , completer (listCompleter songs)
                    ])
 
-shuffleParserT :: MonadIO m => ReaderT Global m (Parser MuCommand)
+shuffleParserT :: (MonadIO m, MonadReader Global m) => m (Parser MuCommand)
 shuffleParserT = do mdir <- asks (musicDir . config)
-                    songs <- withReaderT fileinfo (songsIn mdir)
+                    songs <- songsIn mdir
                     pure $ Shuffle <$> many (strOption $ mconcat
                       [ long "shuffle"
                       , metavar "[SONGS]"

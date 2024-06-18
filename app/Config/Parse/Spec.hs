@@ -9,7 +9,7 @@ import           Dhall                  (FromDhall, auto, inputFile)
 import           Downloader             (Downloader (Downloader))
 import           Editor                 (Editor (Editor))
 import           GHC.Generics           (Generic)
-import           Lib
+import           Types
 import           Player                 (Player (Player))
 import           System.Process         (callProcess)
 

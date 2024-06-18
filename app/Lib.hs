@@ -1,21 +1,24 @@
 module Lib where
 
 import           Control.Monad.IO.Class (MonadIO (liftIO))
-import           Control.Monad.Reader   (ReaderT, asks)
-import           Data.Text              (Text)
+import           Control.Monad.Reader   (MonadReader, asks)
 import           FileInfo               (FileInfo (..))
+import           Global                 (Global (..))
 import           System.Directory       (listDirectory)
 import           System.FilePath        (isExtensionOf, takeBaseName)
 
--- | Command and options/args
-type Command = [String]
-type SongName = String
-type URL = FilePath
-type OS = String
-type ErrorMessage = Text
+class HasAudioFileExt a where
+  getAudioFileExt :: a -> String
 
-songsIn :: MonadIO m => FilePath -> ReaderT FileInfo m [String]  -- basenames
-songsIn dir = do ext <- asks audioFileExt
+instance HasAudioFileExt FileInfo where
+  getAudioFileExt = audioFileExt
+
+instance HasAudioFileExt Global where
+  getAudioFileExt = audioFileExt . fileinfo
+
+-- | Get basenames of audio files under a directory
+songsIn :: (HasAudioFileExt a, MonadIO m, MonadReader a m) => FilePath -> m [String]
+songsIn dir = do ext <- asks getAudioFileExt
                  files <- liftIO $ listDirectory dir
                  let audios = filter (ext `isExtensionOf`) files
                  return $ map takeBaseName audios

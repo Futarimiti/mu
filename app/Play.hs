@@ -3,22 +3,22 @@
 module Play (playSeqLogged, shuffleLogged) where
 
 import           Config                (Config (..))
-import           Control.Monad.Logger  (LoggingT, logErrorN, logInfoN)
-import           Control.Monad.Reader  (MonadIO (..), ReaderT, asks,
-                                        withReaderT)
+import           Control.Monad.Logger  (MonadLogger, logErrorN, logInfoN)
+import           Control.Monad.Reader  (MonadIO (..), MonadReader, asks)
 import           FileInfo              (FileInfo (..))
 import           Global                (Global (..))
-import           Lib                   (SongName, songsIn)
+import           Lib                   (songsIn)
 import           Messages              (Messages (..))
 import           Player                (Player (..))
 import           System.Directory      (doesFileExist)
 import           System.FilePath       ((<.>), (</>))
 import           System.Random.Shuffle (shuffleM)
+import           Types
 
-playSeqLogged :: MonadIO io => [SongName] -> ReaderT Global (LoggingT io) ()
+playSeqLogged :: (MonadIO m, MonadLogger m, MonadReader Global m) => [SongName] -> m ()
 playSeqLogged = mapM_ play1Logged
 
-play1Logged :: MonadIO io => SongName -> ReaderT Global (LoggingT io) ()
+play1Logged :: (MonadIO m, MonadLogger m, MonadReader Global m) => SongName -> m ()
 play1Logged song = do fi <- asks fileinfo
                       config <- asks config
                       notExist <- asks (songNotExist . mess)
@@ -30,10 +30,10 @@ play1Logged song = do fi <- asks fileinfo
                                 else do logErrorN (notExist song)
 
 -- | If given, shuffle through specified songs, otherwise shuffle through all songs
-shuffleLogged :: MonadIO io => [SongName] -> ReaderT Global (LoggingT io) ()
+shuffleLogged :: (MonadIO m, MonadLogger m, MonadReader Global m) => [SongName] -> m ()
 shuffleLogged list = do config <- asks config
                         songs <- case list of
-                                   [] -> withReaderT fileinfo (songsIn config.musicDir)
+                                   [] -> songsIn config.musicDir
                                    ne -> return ne
                         shuffled <- liftIO $ shuffleM songs
                         playSeqLogged shuffled

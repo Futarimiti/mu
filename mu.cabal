@@ -29,6 +29,7 @@ executable mu
     Commands
     Config
     Config.Parse
+    Types
     Config.Parse.Spec
     Config.User
     Downloader
@@ -48,7 +49,7 @@ executable mu
     Update.Serialisation
 
   build-depends:
-    , base                  ^>=4.17.1.0
+    , base
     , bytestring
     , containers
     , dhall

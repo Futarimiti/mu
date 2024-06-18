@@ -6,7 +6,7 @@ import           Control.Monad.IO.Class (MonadIO (liftIO))
 import           Data.Text              (Text, pack)
 import           Dhall                  (FromDhall, auto, input)
 import           GHC.Generics           (Generic)
-import           Lib
+import           Types
 
 data Messages = Messages { cannotInferDefaultPlayerByOS :: OS -> Text
                          , cannotInferMusicDir          :: Text

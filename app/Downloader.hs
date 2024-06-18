@@ -1,6 +1,6 @@
 module Downloader (Downloader(..)) where
 
-import           Lib
+import           Types
 
 -- | A programme that is able to download a song from a website
 -- given by the URL to a destination
