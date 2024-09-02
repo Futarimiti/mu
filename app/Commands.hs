@@ -1,6 +1,6 @@
 module Commands (runCommandLogged, MuCommand(..)) where
 
-import           Control.Monad.Catch  (MonadMask, MonadThrow)
+import           Control.Monad.Catch  (MonadMask)
 import           Control.Monad.Logger (MonadLogger)
 import           Control.Monad.Reader (MonadIO, MonadReader)
 import           Global               (Global)
@@ -15,7 +15,7 @@ data MuCommand = Play [SongName]     -- | Play songs sequentially
                | Update              -- | Update library
                deriving (Show, Eq, Read)
 
-runCommandLogged :: (MonadIO m, MonadThrow m, MonadLogger m, MonadMask m, MonadReader Global m)
+runCommandLogged :: (MonadIO m, MonadLogger m, MonadMask m, MonadReader Global m)
                  => MuCommand
                  -> m ()
 runCommandLogged (Play songs)    = playSeqLogged songs

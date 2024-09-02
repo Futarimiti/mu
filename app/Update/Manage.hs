@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedRecordDot #-}
 {-# LANGUAGE RecordWildCards     #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Update.Manage (manageSongsLogged) where
 

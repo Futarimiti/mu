@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedRecordDot #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Update (updateLogged) where
 
@@ -26,7 +27,6 @@ import           Update.Serialisation   (deserialiseMap, serialiseMap)
 
 updateLogged ::
   ( MonadIO m
-  , MonadThrow m
   , MonadMask m
   , MonadLogger m
   , MonadReader Global m
@@ -34,7 +34,7 @@ updateLogged ::
 updateLogged = do
   g <- ask
   let fi = g.fileinfo
-  let editor = g.config.editor
+  let editor_ = g.config.editor
   let tempFileTemplate = fi.updateFilename <.> fi.updateFileExt
   withSystemTempFile tempFileTemplate $ \f _ -> do
     mapPath <- liftIO $ getXdgDirectory XdgData fi.serialiseDataPath
@@ -42,7 +42,7 @@ updateLogged = do
     oldMap <- if hasSerialisedData then deserialiseMap mapPath
                                    else return mempty
     encodeFile' f oldMap
-    liftIO $ editor.edit f
+    liftIO $ editor_.edit f
     decodeResult <- runReaderT (runExceptT $ decodeFile' f) g
     newMap <- case decodeResult of
                 Left err -> do

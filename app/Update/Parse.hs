@@ -33,8 +33,8 @@ encodeFile' :: (MonadIO m, MonadReader Global m) => FilePath -> Map SongName URL
 encodeFile' f m = do fi <- asks fileinfo
                      case fi.updateFileFormat of
                        "yaml" -> liftIO $ Yaml.encodeFile f m
-                       _ -> do mess <- asks mess
-                               error . unpack $ notSupportedUpdateFileFormat mess fi.updateFileFormat
+                       _ -> do mess_ <- asks mess
+                               error . unpack $ notSupportedUpdateFileFormat mess_ fi.updateFileFormat
 
 --- impl
 

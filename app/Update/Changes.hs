@@ -1,4 +1,5 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Update.Changes where
 
@@ -7,7 +8,7 @@ import           Data.Map    (Map, filterWithKey, intersection, keys, (!), (\\))
 import           Data.Maybe  (catMaybes)
 import           Data.Text   (Text)
 import qualified Data.Text   as Text
-import           Types         
+import           Types
 import           Text.Printf (printf)
 
 data Changes a b = Changes { new      :: Map a b

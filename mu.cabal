@@ -1,57 +1,3 @@
-<<<<<<< Updated upstream
-cabal-version:   3.0
-name:            mu
-version:         0.1.0.0
-synopsis:        Command line music player
-homepage:        https://github.com/Futarimiti/mu
-license:         MIT
-license-file:    LICENSE
-author:          Futar
-maintainer:      Futarimiti@163.com
-category:        Sound
-build-type:      Simple
-extra-doc-files: README.md
-data-dir:        resources
-data-files:
-  fileinfo.dhall
-  messages.dhall
-
-common warnings
-  ghc-options: -Wall -Wmonomorphism-restriction
-
-executable mu
-  import:             warnings
-  main-is:            Main.hs
-  default-extensions:
-    OverloadedStrings
-    StrictData
-
-  other-modules:
-    Commands
-    Config
-    Config.Parse
-    Types
-    Config.Parse.Spec
-    Config.User
-    Downloader
-    Editor
-    FileInfo
-    Global
-    Lib
-    Messages
-    Options
-    Paths_mu
-    Play
-    Player
-    Update
-    Update.Changes
-    Update.Manage
-    Update.Parse
-    Update.Serialisation
-
-  build-depends:
-    , base
-=======
 cabal-version: 1.12
 
 -- This file has been generated from package.yaml by hpack version 0.37.0.
@@ -93,53 +39,45 @@ executable mu
       Downloader
       Editor
       FileInfo
+      Global
+      Lib
       Messages
       Options
       Play
       Player
+      Types
       Update
+      Update.Changes
       Update.Manage
       Update.Parse
-      Lib
+      Update.Serialisation
       Paths_mu
   hs-source-dirs:
       app
-      src
   default-extensions:
       DataKinds
       DeriveGeneric
       DeriveAnyClass
       InstanceSigs
+      FlexibleContexts
+      StrictData
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -Wmonomorphism-restriction -O2 -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
->>>>>>> Stashed changes
     , bytestring
     , containers
     , dhall
     , directory
-<<<<<<< Updated upstream
     , exceptions
     , filepath
     , monad-logger
     , mtl
-=======
-    , filepath
->>>>>>> Stashed changes
     , optparse-applicative
     , process
     , random-shuffle
     , serialise
     , temporary
     , text
-<<<<<<< Updated upstream
-    , transformers          ^>=0.6.0.0
-    , yaml
-
-  hs-source-dirs:     app
-  default-language:   GHC2021
-=======
     , transformers >=0.6.0.0 && <0.7
     , yaml
   default-language: Haskell2010
->>>>>>> Stashed changes
