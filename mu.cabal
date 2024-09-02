@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 cabal-version:   3.0
 name:            mu
 version:         0.1.0.0
@@ -50,22 +51,95 @@ executable mu
 
   build-depends:
     , base
+=======
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.37.0.
+--
+-- see: https://github.com/sol/hpack
+
+name:           mu
+version:        0.1.0.0
+synopsis:       Personal music downloader & player
+description:    Please see the README on GitHub at <https://github.com/Futarimiti/mu#readme>
+category:       Sound
+homepage:       https://github.com/Futarimiti/mu#readme
+bug-reports:    https://github.com/Futarimiti/mu/issues
+author:         Carman Fu
+maintainer:     futarimiti@163.com
+copyright:      Carman Fu 2024
+license:        MIT
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+data-files:
+    messages.dhall
+    fileinfo.dhall
+data-dir:       resources
+
+source-repository head
+  type: git
+  location: https://github.com/Futarimiti/mu
+
+executable mu
+  main-is: Main.hs
+  other-modules:
+      Commands
+      Config
+      Config.Parse
+      Config.Parse.Spec
+      Config.User
+      Downloader
+      Editor
+      FileInfo
+      Messages
+      Options
+      Play
+      Player
+      Update
+      Update.Manage
+      Update.Parse
+      Lib
+      Paths_mu
+  hs-source-dirs:
+      app
+      src
+  default-extensions:
+      DataKinds
+      DeriveGeneric
+      DeriveAnyClass
+      InstanceSigs
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -Wmonomorphism-restriction -O2 -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+>>>>>>> Stashed changes
     , bytestring
     , containers
     , dhall
     , directory
+<<<<<<< Updated upstream
     , exceptions
     , filepath
     , monad-logger
     , mtl
+=======
+    , filepath
+>>>>>>> Stashed changes
     , optparse-applicative
     , process
     , random-shuffle
     , serialise
     , temporary
     , text
+<<<<<<< Updated upstream
     , transformers          ^>=0.6.0.0
     , yaml
 
   hs-source-dirs:     app
   default-language:   GHC2021
+=======
+    , transformers >=0.6.0.0 && <0.7
+    , yaml
+  default-language: Haskell2010
+>>>>>>> Stashed changes
