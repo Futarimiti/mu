@@ -1,10 +1,11 @@
-module Global (Global(..)) where
+module Global (Global (..)) where
 
-import           Config   (Config)
-import           FileInfo (FileInfo)
-import           Messages (Messages)
+import Config   (Config)
+import FileInfo (FileInfo)
+import Messages (Messages)
 
-data Global = Global { config   :: Config
-                     , fileinfo :: FileInfo
-                     , mess     :: Messages
-                     }
+data Global = Global
+  { config   :: Config
+  , fileinfo :: FileInfo
+  , mess     :: Messages
+  }

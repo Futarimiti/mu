@@ -1,6 +1,6 @@
 module Types where
 
-import           Data.Text              (Text)
+import Data.Text (Text)
 
 -- | Command and options/args
 type Command = [String]

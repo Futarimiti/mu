@@ -53,13 +53,13 @@ removeSongsLogged = mapM_ $ \song -> do
         logWarnN "Should I move on as if nothing happened? [y/n]"
         response <- liftIO getLine
         case response of
-          "y" -> return ()
+          "y" -> pure ()
           _   -> logErrorN "Aborted"
       | otherwise -> logErrorN $ "Error removing "
                                   <> Text.pack song
                                   <> ": "
                                   <> Text.pack (show e)
-    _                        -> return ()
+    _                        -> pure ()
 
 removeSong1Logged :: (MonadIO m, MonadLogger m, MonadReader Global m)
                   => SongName
@@ -82,7 +82,7 @@ downloadSong1Logged song url = do down <- asks (downloader . config)
 getSongPath :: MonadReader Global m => SongName -> m FilePath
 getSongPath song = do mdir <- asks (musicDir . config)
                       ext <- asks (audioFileExt . fileinfo)
-                      return $ mdir </> song <.> ext
+                      pure $ mdir </> song <.> ext
 
 reinstallSong1Logged :: (MonadIO m, MonadLogger m, MonadReader Global m)
                      => SongName
