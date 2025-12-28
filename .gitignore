@@ -1,3 +1,4 @@
+*.cabal
 result
 # Created by https://www.toptal.com/developers/gitignore/api/haskell,macos,vim,git,direnv
 # Edit at https://www.toptal.com/developers/gitignore?templates=haskell,macos,vim,git,direnv
