@@ -1,8 +1,9 @@
 module Config (Config (..)) where
 
-import Downloader (Downloader)
-import Editor     (Editor)
-import Player     (Player)
+import Data.Default
+import Downloader   (Downloader)
+import Editor       (Editor)
+import Player       (Player)
 
 data Config = Config
   { editor     :: Editor
@@ -11,3 +12,5 @@ data Config = Config
   , musicDir   :: FilePath
   }
 
+instance Default Config where
+  def = Config def def def "/"  -- XXX

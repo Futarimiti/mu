@@ -5,6 +5,8 @@ import Config.User               (getUserConfig)
 import Control.Monad.Logger
 import Control.Monad.Reader      (ReaderT (runReaderT))
 import Control.Monad.Trans.Maybe (MaybeT (runMaybeT))
+import Data.Default              (def)
+import Data.Maybe
 import FileInfo                  qualified (parseFile)
 import Global                    (Global (Global))
 import Messages                  qualified (parseFile)
@@ -15,9 +17,7 @@ main :: IO ()
 main = do
   fi <- getDataFileName "fileinfo.dhall" >>= FileInfo.parseFile
   mess <- getDataFileName "messages.dhall" >>= Messages.parseFile
-  c <- runNoLoggingT (runMaybeT (getUserConfig fi)) >>= \case
-         Just c  -> pure c
-         Nothing -> fail "config not found"
+  c <- fromMaybe def <$> runNoLoggingT (runMaybeT (getUserConfig fi))
   let g = Global c fi mess
   action <- runReaderT parseArgs g
   runStderrLoggingT $ runReaderT (runCommandLogged action) g
