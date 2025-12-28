@@ -20,7 +20,12 @@
       in
       {
         packages = rec {
-          mu = haskellPackages.developPackage { root = ./.; };
+          mu = haskellPackages.generateOptparseApplicativeCompletions [ "mu" ] (
+            haskellPackages.developPackage {
+              root = ./.;
+              returnShellEnv = false;
+            }
+          );
           default = mu;
         };
         apps = rec {
