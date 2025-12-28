@@ -1,9 +1,9 @@
-{-# LANGUAGE OverloadedRecordDot #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Play (playSeqLogged, shuffleLogged) where
 
 import Config                (Config (..))
-import Control.Monad.Logger  (MonadLogger, logErrorN, logInfoN)
+import Control.Monad.Logger
 import Control.Monad.Reader  (MonadIO (..), MonadReader, asks)
 import FileInfo              (FileInfo (..))
 import Global                (Global (..))
@@ -26,10 +26,15 @@ play1Logged song = do
   let songFile = config.musicDir </> song <.> fi.audioFileExt
   exists <- liftIO $ doesFileExist songFile
   if exists then do
-    currentPlay <- asks (currentPlaying . mess)
-    logInfoN (currentPlay song)
+    logCurrent song
     liftIO $ config.player.play songFile
   else logErrorN (notExist song)
+
+-- | Log the current playing song
+logCurrent :: (MonadReader Global m, MonadLogger m) => SongName -> m ()
+logCurrent song = do
+  currentPlay <- asks (currentPlaying . mess)
+  logOtherN (LevelOther "playing") (currentPlay song)
 
 -- | If given, shuffle through specified songs, otherwise shuffle through all songs
 shuffleLogged :: (MonadIO m, MonadLogger m, MonadReader Global m) => [SongName] -> m ()

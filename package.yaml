@@ -17,12 +17,16 @@ data-files:
   - fileinfo.dhall
 default-extensions:
   - DataKinds
-  - DeriveGeneric
   - DeriveAnyClass
-  - InstanceSigs
+  - DeriveGeneric
   - FlexibleContexts
-  - StrictData
   - ImportQualifiedPost
+  - InstanceSigs
+  - LambdaCase
+  - OverloadedRecordDot
+  - QuasiQuotes
+  - StrictData
+  - TemplateHaskell
 dependencies:
   - base >= 4.7 && < 5
   - bytestring
@@ -37,6 +41,7 @@ dependencies:
   - process
   - random-shuffle
   - serialise
+  - string-interpolate
   - temporary
   - text
   - transformers          ^>=0.6.0.0
@@ -49,9 +54,10 @@ ghc-options:
   - -Wincomplete-uni-patterns
   - -Wmissing-export-lists
   - -Wmissing-home-modules
+  - -Wmonomorphism-restriction
+  - -Wno-name-shadowing
   - -Wpartial-fields
   - -Wredundant-constraints
-  - -Wmonomorphism-restriction
   - -O2
 executables:
   mu:
