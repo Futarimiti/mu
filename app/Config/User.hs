@@ -22,6 +22,6 @@ getUserConfig fi = do
     $logDebug "getting status of user config"
     liftIO $ doesFileExist path
   unless exists $ do
-    $logError [i|user config does not exist at #{path}|]
+    $logWarn [i|user config does not exist at #{path}|]
     fail "failed to get user config"
   lift $ Config.parseFile path
