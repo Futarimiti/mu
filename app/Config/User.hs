@@ -1,19 +1,27 @@
-{-# LANGUAGE OverloadedRecordDot #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Config.User (getUserConfig) where
 
-import           Config                    (Config)
-import qualified Config.Parse              as Config
-import           Control.Monad             (guard)
-import           Control.Monad.IO.Class    (MonadIO (..))
-import           Control.Monad.Trans.Class (MonadTrans (..))
-import           Control.Monad.Trans.Maybe (MaybeT)
-import           FileInfo                  (FileInfo (..))
-import           System.Directory          (XdgDirectory (..), doesFileExist,
-                                            getXdgDirectory)
+import Config                    (Config)
+import Config.Parse              qualified as Config
+import Control.Monad
+import Control.Monad.IO.Class    (MonadIO (..))
+import Control.Monad.Logger
+import Control.Monad.Trans.Class (MonadTrans (..))
+import Control.Monad.Trans.Maybe (MaybeT)
+import Data.String.Interpolate   (i)
+import FileInfo                  (FileInfo (..))
+import System.Directory          (XdgDirectory (..), doesFileExist, getXdgDirectory)
 
-getUserConfig :: MonadIO io => FileInfo -> MaybeT io Config
-getUserConfig fi = do path <- liftIO $ getXdgDirectory XdgConfig fi.configFilePath
-                      exists <- liftIO $ doesFileExist path
-                      guard exists
-                      lift $ Config.parseFile path
+getUserConfig :: (MonadLogger m, MonadIO m) => FileInfo -> MaybeT m Config
+getUserConfig fi = do
+  path <- do
+    $logDebug "getting path to user config"
+    liftIO $ getXdgDirectory XdgConfig fi.configFilePath
+  exists <- do
+    $logDebug "getting status of user config"
+    liftIO $ doesFileExist path
+  unless exists $ do
+    $logError [i|user config does not exist at #{path}|]
+    fail "failed to get user config"
+  lift $ Config.parseFile path
