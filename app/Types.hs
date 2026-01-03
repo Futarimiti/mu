@@ -69,3 +69,10 @@ data Options = Options
   , confFile :: Maybe FilePath
   , command  :: Command
   } deriving (Show, Eq, Generic, Data)
+
+-- for reader pattern
+data AppEnv = AppEnv
+  { verbose :: Bool
+  , conf    :: Config
+  , command :: Command
+  } deriving (Show, Eq, Generic, Data)
