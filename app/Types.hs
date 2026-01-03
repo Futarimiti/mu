@@ -61,6 +61,7 @@ data Command
   | PlayList PlayOrder String
   | RemoveDownload (SomeOrAll String)
   | EnsureDownload (SomeOrAll String)
+  | ListSome (SomeOrAll String)
   deriving (Show, Eq, Generic, Data)
 
 -- command-line options

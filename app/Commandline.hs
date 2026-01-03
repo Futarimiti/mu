@@ -40,27 +40,33 @@ pverbose = switch $ mconcat
 
 pcommand, pplaySomeFallback, psubcommand :: Parser Command
 pcommand = psubcommand <|> pplaySomeFallback
-pplaySomeFallback = PlaySome <$> pgiven pplayOrder
+pplaySomeFallback = PlaySome <$> pgiven "TRACK" pplayOrder
 psubcommand = hsubparser $ mconcat
   [ playSomeMod
   , playListMod
   , removeDownloadMod
   , ensureDownloadMod
+  , listSomeMod
   ]
 
-removeDownloadMod, playListMod, playSomeMod, ensureDownloadMod :: Mod CommandFields Command
+removeDownloadMod, playListMod, playSomeMod, ensureDownloadMod, listSomeMod
+  :: Mod CommandFields Command
 removeDownloadMod = Optparse.command "remove" piremoveDownload
 playListMod = Optparse.command "playlist" piplayList
 playSomeMod = Optparse.command "play" piplaySome
 ensureDownloadMod = Optparse.command "ensure-download" piensureDownload
+listSomeMod = Optparse.command "list" pilistSome
 
-piensureDownload, piremoveDownload, piplayList, piplaySome :: ParserInfo Command
+piensureDownload, piremoveDownload, piplayList, piplaySome, pilistSome
+  :: ParserInfo Command
 piensureDownload = info pensureDownload (progDesc "Ensure track downloads")
 piremoveDownload = info premoveDownload (progDesc "Remove track downloads")
 piplayList = info pplayList (progDesc "Play through a playlist")
 piplaySome = info pplaySome (progDesc "Play one or more tracks")
+pilistSome = info plistSome (progDesc "List library or playlist(s)")
 
-pensureDownload, premoveDownload, pplayList, pplaySome :: Parser Command
+pensureDownload, premoveDownload, pplayList, pplaySome, plistSome
+  :: Parser Command
 pensureDownload = EnsureDownload <$> ptracks
 premoveDownload = RemoveDownload <$> ptracks
 pplayList = liftA2 PlayList pplayOrder pplayList
@@ -68,16 +74,23 @@ pplayList = liftA2 PlayList pplayOrder pplayList
     pplayList :: Parser String
     pplayList = strArgument $ metavar "PLAYLIST"
 pplaySome = PlaySome <$> ptracksWithOrder
+plistSome = ListSome <$> pplaylists
+
+pplaylists :: Parser (SomeOrAll String)
+pplaylists = do
+  m <- optional $ pgiven' <|> pall
+  pure $ fromMaybe All m
+  where pgiven' = pgiven "PLAYLIST" (pure ())
 
 ptracksWithOrder :: Parser (SomeWithOptsOrAll PlayOrder String)
-ptracksWithOrder = pgiven pplayOrder <|> pall
+ptracksWithOrder = pgiven "TRACK" pplayOrder <|> pall
 
-pgiven :: Parser a -> Parser (SomeWithOptsOrAll a String)
-pgiven pa = liftA2 Given pa (some1 . strArgument $ metavar "TRACK")
+pgiven :: String -> Parser a -> Parser (SomeWithOptsOrAll a String)
+pgiven metavarName pa = liftA2 Given pa (some1 . strArgument $ metavar metavarName)
 
 ptracks :: Parser (SomeOrAll String)
 ptracks = pgiven' <|> pall
-  where pgiven' = pgiven (pure ())
+  where pgiven' = pgiven "TRACK" (pure ())
 
 pall :: Parser (SomeWithOptsOrAll a String)
 pall = flag' All $ long "all" <> help "Shuffle through all"
