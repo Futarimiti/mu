@@ -22,15 +22,7 @@
             import ./default.nix {
               inherit pkgs haskellPackages conf;
             };
-          example = withConfig {
-            playlists = [ ];
-            library = [
-              {
-                name = "arcadia";
-                url = "https://www.youtube.com/watch?v=e0LujX7wAQg";
-              }
-            ];
-          };
+          example = withConfig (import ./nix/example.nix);
         };
         devShells.default = import ./shell.nix {
           inherit pkgs haskellPackages;

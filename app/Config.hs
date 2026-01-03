@@ -1,4 +1,4 @@
-module Config (Config, ConfigOf (..), RawConfig, getWith) where
+module Config (Config, ConfigF (..), RawConfig, getWith) where
 
 import Control.Monad.Catch
 import Control.Monad.IO.Class

@@ -1,11 +1,13 @@
 module Types where
 
+import Control.Monad.Catch
 import Data.Aeson
 import Data.Data
 import Data.Default
 import Data.Functor.Barbie
 import Data.Functor.Identity
 import Data.List.NonEmpty
+import Data.Map              (Map)
 import GHC.Generics
 
 data PlayOrder = Sequential | Shuffle
@@ -18,41 +20,44 @@ type SomeOrAll = SomeWithOptsOrAll ()
 
 type URL = String
 
+type Playlists = Map PlaylistRef PlaylistInfo
+
+type Library = Map TrackRef TrackInfo
+
 data TrackInfo = TrackInfo
-  { name :: String
+  { name :: Maybe String
   , url  :: URL
   } deriving (Show, Eq, Generic, Data)
 
 instance FromJSON TrackInfo
 
-data Playlist = Playlist
+data PlaylistInfo = PlaylistInfo
   { name   :: String
   , tracks :: [String]
   } deriving (Show, Eq, Generic, Data)
 
-instance FromJSON Playlist
+instance FromJSON PlaylistInfo
 
-data ConfigOf f = Config
-  { playlists :: f [Playlist]
-  , library   :: f [TrackInfo]
+data ConfigF f = Config
+  { playlists :: f Playlists
+  , library   :: f Library
   } deriving (Generic)
 
-instance FunctorB ConfigOf
-instance ApplicativeB ConfigOf
-instance TraversableB ConfigOf
-instance ConstraintsB ConfigOf
-deriving instance AllBF Show f ConfigOf => Show (ConfigOf f)
-deriving instance AllBF Eq f ConfigOf => Eq (ConfigOf f)
-deriving instance (Typeable f, AllBF Data f ConfigOf) => Data (ConfigOf f)
+instance FunctorB ConfigF
+instance ApplicativeB ConfigF
+instance TraversableB ConfigF
+instance ConstraintsB ConfigF
+deriving instance AllBF Show f ConfigF => Show (ConfigF f)
+deriving instance AllBF Eq f ConfigF => Eq (ConfigF f)
+deriving instance (Typeable f, AllBF Data f ConfigF) => Data (ConfigF f)
 
--- | User config
-type Config = ConfigOf Identity
+-- | Validated config
+type Config = ConfigF Identity
 
-instance Default Config where
-  def = Config (Identity []) (Identity [])
+instance Default Config
 
 -- | Raw input - could lack any fields
-type RawConfig = ConfigOf Maybe
+type RawConfig = ConfigF Maybe
 
 instance FromJSON RawConfig
 
@@ -77,3 +82,19 @@ data AppEnv = AppEnv
   , conf    :: Config
   , command :: Command
   } deriving (Show, Eq, Generic, Data)
+
+type TrackRef = String
+
+type PlaylistRef = String
+
+newtype TrackNotFoundException
+  = TrackNotFoundException { ref :: TrackRef }
+  deriving (Show, Eq, Generic, Data)
+
+instance Exception TrackNotFoundException
+
+newtype PlaylistNotFoundException
+  = PlaylistNotFoundException { ref :: PlaylistRef }
+  deriving (Show, Eq, Generic, Data)
+
+instance Exception PlaylistNotFoundException
