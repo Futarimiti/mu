@@ -13,12 +13,28 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
         haskellPackages = pkgs.haskell.packages.ghc984;
-        mu = import ./default.nix { inherit pkgs haskellPackages; };
       in
       {
-        packages.default = mu;
-        apps.default = flake-utils.lib.mkApp { drv = mu; };
-        devShells.default = import ./shell.nix { inherit pkgs haskellPackages; };
+        packages = rec {
+          default = withConfig null;
+          withConfig =
+            conf:
+            import ./default.nix {
+              inherit pkgs haskellPackages conf;
+            };
+          example = withConfig {
+            playlists = [ ];
+            library = [
+              {
+                name = "arcadia";
+                url = "https://www.youtube.com/watch?v=e0LujX7wAQg";
+              }
+            ];
+          };
+        };
+        devShells.default = import ./shell.nix {
+          inherit pkgs haskellPackages;
+        };
       }
     );
 }

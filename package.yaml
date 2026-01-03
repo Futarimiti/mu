@@ -2,6 +2,8 @@ name: mu
 data-dir: resources
 data-files: []
 dependencies:
+  - aeson
+  - barbies
   - base >= 4.7 && < 5
   - bytestring
   - containers
@@ -10,11 +12,14 @@ dependencies:
   - directory
   - exceptions
   - filepath
+  - generic-lens
+  - lens
   - monad-logger
   - mtl
   - optparse-applicative
   - process
   - random-shuffle
+  - safe-exceptions
   - serialise
   - string-interpolate
   - temporary
@@ -35,6 +40,7 @@ default-extensions:
   - DeriveTraversable
   - DerivingStrategies
   - DerivingVia
+  - DuplicateRecordFields
   - FlexibleContexts
   - FlexibleInstances
   - FunctionalDependencies
@@ -60,6 +66,7 @@ default-extensions:
   - TypeApplications
   - TypeFamilyDependencies
   - TypeOperators
+  - UndecidableInstances
   - UnicodeSyntax
   - ViewPatterns
 ghc-options:

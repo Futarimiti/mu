@@ -5,6 +5,8 @@
   symlinkJoin,
   makeWrapper,
   lib,
+  writeText,
+  conf ? null,
   ...
 }:
 let
@@ -15,6 +17,9 @@ let
   name = "mu";
   runtimeDeps = import ./runtime-deps.nix { inherit pkgs; };
   withCompletion = generateOptparseApplicativeCompletions [ name ];
+  configFileFlag = lib.optionalString (conf != null) ''
+    --append-flags "--config ${writeText "config.json" (builtins.toJSON conf)}"
+  '';
   withRuntimeDeps =
     deps: pkg:
     symlinkJoin {
@@ -22,7 +27,9 @@ let
       paths = [ pkg ];
       buildInputs = [ makeWrapper ];
       postBuild = ''
-        wrapProgram $out/bin/mu --prefix PATH : ${lib.makeBinPath deps}
+        wrapProgram $out/bin/mu \
+          --prefix PATH : ${lib.makeBinPath deps} \
+          ${configFileFlag}
       '';
     };
 in

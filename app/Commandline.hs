@@ -28,6 +28,7 @@ parser :: Parser Options
 parser = do
   command <- fromMaybe (PlaySome All) <$> optional pcommand
   verbose <- pverbose
+  confFile <- optional pconfFile
   pure Options {..}
 
 pverbose :: Parser Bool
@@ -87,4 +88,12 @@ pplayOrder = flag Sequential Shuffle $ mconcat
   , long "random"
   , short 'r'
   , help "Play in random order (sequential by default)"
+  ]
+
+pconfFile :: Parser FilePath
+pconfFile = strOption $ mconcat
+  [ long "config"
+  , short 'c'
+  , metavar "FILE"
+  , help "Path to user config file"
   ]
