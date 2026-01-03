@@ -20,8 +20,8 @@ app :: AppM m => m ()
 app = do
   args <- liftIO Env.getArgs
   $logDebug [i|CLI args: #{args}|]
-  options <- ask
-  $logDebug [i|CLI options: #{options}|]
+  env <- ask
+  $logDebug [i|AppEnv: #{env}|]
   config <- view #conf
   $logDebug [i|User config: #{config}|]
   liftIO $ putStrLn "imagine song playing"
